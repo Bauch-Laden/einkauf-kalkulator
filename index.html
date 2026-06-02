@@ -89,6 +89,31 @@
     gap: 8px;
   }
 
+  @media (max-width: 480px) {
+    .dishes {
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 6px;
+    }
+    .dish-card {
+      padding: 8px;
+    }
+    .dish-card .dish-name {
+      font-size: 12px;
+    }
+    .dish-card .dish-base {
+      font-size: 10px;
+    }
+    .portion-btn {
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
+    }
+    .portion-num {
+      width: 40px;
+      font-size: 12px;
+    }
+  }
+
   .dish-card {
     background: var(--surface);
     border: 1.5px solid var(--border);
@@ -409,10 +434,15 @@
   .readonly-banner {
     background: var(--orange);
     color: white;
-    text-align: center;
-    padding: 10px 16px;
+    padding: 10px 20px;
     font-size: 13px;
     font-weight: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    text-align: center;
   }
 
   /* Einkaufsliste tick */
@@ -471,12 +501,12 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.5</span></p>
+    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.6</span></p>
   </div>
 </header>
-<div class="readonly-banner" id="readonly-banner" style="display:none;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-  <span>🛒 Einkaufsmodus — tippe auf einen Artikel um ihn abzuhaken</span>
-  <span style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+<div class="readonly-banner" id="readonly-banner">
+  <span id="banner-text">🛒 Einkaufsmodus — tippe auf einen Artikel um ihn abzuhaken</span>
+  <span style="display:flex;align-items:center;gap:12px;">
     <span id="back-to-shopping-btn" onclick="backToShopping()" style="display:none;font-size:11px;cursor:pointer;text-decoration:underline;opacity:0.85;">🛒 Zurück zum Einkaufsmodus</span>
     <span id="backoffice-link" onclick="requestBackoffice()" style="font-size:11px;opacity:0.75;cursor:pointer;text-decoration:underline;">🔒 Backoffice</span>
   </span>
@@ -746,13 +776,14 @@ function resetBought() {
 }
 
 function backToShopping() {
-  // Hide planner, show shopping mode banner
   document.getElementById('dishes').style.display = 'none';
   document.querySelector('.section-label').style.display = 'none';
   document.getElementById('readonly-banner').style.display = 'flex';
+  document.getElementById('banner-text').textContent = '🛒 Einkaufsmodus — tippe auf einen Artikel um ihn abzuhaken';
   document.getElementById('share-row').style.display = 'none';
   document.getElementById('backoffice-link').style.display = 'inline';
   document.getElementById('back-to-shopping-btn').style.display = 'none';
+  renderResult();
 }
 
 function shareList() {
@@ -881,6 +912,7 @@ function checkPW() {
     closePWModal();
     // Switch to planner mode
     document.getElementById('readonly-banner').style.display = 'flex';
+    document.getElementById('banner-text').textContent = '⚙️ Backoffice-Modus — Gerichte und Portionen anpassen';
     document.getElementById('dishes').style.display = 'grid';
     document.querySelector('.section-label').style.display = 'block';
     document.getElementById('backoffice-link').style.display = 'none';
@@ -904,7 +936,7 @@ const isShared = loadFromURL();
 if (isShared) {
   document.getElementById('dishes').style.display = 'none';
   document.querySelector('.section-label').style.display = 'none';
-  document.getElementById('readonly-banner').style.display = 'block';
+  document.getElementById('readonly-banner').style.display = 'flex';
 }
 
 renderDishes();
