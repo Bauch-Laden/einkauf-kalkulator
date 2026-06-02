@@ -471,12 +471,15 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.3</span></p>
+    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.5</span></p>
   </div>
 </header>
-<div class="readonly-banner" id="readonly-banner" style="display:none">
-  🛒 Einkaufsmodus — tippe auf einen Artikel um ihn abzuhaken
-  <span id="backoffice-link" onclick="requestBackoffice()" style="margin-left:12px;font-size:11px;opacity:0.75;cursor:pointer;text-decoration:underline;">🔒 Backoffice</span>
+<div class="readonly-banner" id="readonly-banner" style="display:none;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <span>🛒 Einkaufsmodus — tippe auf einen Artikel um ihn abzuhaken</span>
+  <span style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+    <span id="back-to-shopping-btn" onclick="backToShopping()" style="display:none;font-size:11px;cursor:pointer;text-decoration:underline;opacity:0.85;">🛒 Zurück zum Einkaufsmodus</span>
+    <span id="backoffice-link" onclick="requestBackoffice()" style="font-size:11px;opacity:0.75;cursor:pointer;text-decoration:underline;">🔒 Backoffice</span>
+  </span>
 </div>
 
 <!-- PW Modal -->
@@ -501,6 +504,7 @@
 
   <div id="share-row" class="share-row" style="display:none">
     <button class="share-btn" onclick="shareList()">🔗 Liste teilen</button>
+    <button class="reset-btn" style="align-self:center;" onclick="resetBought()">Einkaufsliste zurücksetzen</button>
     <div class="share-toast" id="share-toast">✓ Link kopiert!</div>
   </div>
   <div class="section-label">Einkaufsliste</div>
@@ -736,6 +740,21 @@ function toggleBought(shop, item) {
   renderResult();
 }
 
+function resetBought() {
+  boughtItems.clear();
+  renderResult();
+}
+
+function backToShopping() {
+  // Hide planner, show shopping mode banner
+  document.getElementById('dishes').style.display = 'none';
+  document.querySelector('.section-label').style.display = 'none';
+  document.getElementById('readonly-banner').style.display = 'flex';
+  document.getElementById('share-row').style.display = 'none';
+  document.getElementById('backoffice-link').style.display = 'inline';
+  document.getElementById('back-to-shopping-btn').style.display = 'none';
+}
+
 function shareList() {
   const params = [];
   dishNames.forEach(name => {
@@ -744,7 +763,21 @@ function shareList() {
     }
   });
   if (!params.length) return;
-  const url = window.location.href.split('?')[0] + '?list=' + params.join(',');
+
+  let url = window.location.href.split('?')[0] + '?list=' + params.join(',');
+
+  // Encode bought items
+  if (boughtItems.size > 0) {
+    const boughtArr = [...boughtItems].map(k => encodeURIComponent(k));
+    url += '&bought=' + boughtArr.join(',');
+  }
+
+  // Encode checked checklist items
+  if (checked.size > 0) {
+    const checkedArr = [...checked].map(k => encodeURIComponent(k));
+    url += '&ticked=' + checkedArr.join(',');
+  }
+
   navigator.clipboard.writeText(url).then(() => {
     const toast = document.getElementById('share-toast');
     toast.classList.add('show');
@@ -758,6 +791,8 @@ function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
   const list = params.get('list');
   if (!list) return false;
+
+  // Restore dish selections
   list.split(',').forEach(part => {
     const [name, portions] = part.split(':');
     const decoded = decodeURIComponent(name);
@@ -766,6 +801,19 @@ function loadFromURL() {
       selections[decoded].portions = parseInt(portions) || BASE[decoded].base;
     }
   });
+
+  // Restore bought items
+  const boughtParam = params.get('bought');
+  if (boughtParam) {
+    boughtParam.split(',').forEach(k => boughtItems.add(decodeURIComponent(k)));
+  }
+
+  // Restore checked checklist items
+  const tickedParam = params.get('ticked');
+  if (tickedParam) {
+    tickedParam.split(',').forEach(k => checked.add(decodeURIComponent(k)));
+  }
+
   return true;
 }
 
@@ -832,11 +880,13 @@ function checkPW() {
   if (val === '111222') {
     closePWModal();
     // Switch to planner mode
-    document.getElementById('readonly-banner').style.display = 'none';
+    document.getElementById('readonly-banner').style.display = 'flex';
     document.getElementById('dishes').style.display = 'grid';
     document.querySelector('.section-label').style.display = 'block';
+    document.getElementById('backoffice-link').style.display = 'none';
+    document.getElementById('back-to-shopping-btn').style.display = 'inline';
     // Clean URL
-    window.history.replaceState({}, '', window.location.pathname);
+    try { window.history.replaceState({}, '', window.location.pathname); } catch(e) {}
   } else {
     document.getElementById('pw-error').style.display = 'block';
     document.getElementById('pw-input').value = '';
