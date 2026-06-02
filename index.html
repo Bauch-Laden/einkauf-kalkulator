@@ -493,6 +493,64 @@
     line-height: 1;
   }
   .shop-item.bought .shop-tick-mark { display: block; }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1.5px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    background: none;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1.5px;
+  }
+  .tab-btn.active {
+    color: var(--orange);
+    border-bottom-color: var(--orange);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .gericht-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .gericht-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    background: var(--orange);
+  }
+  .gericht-title { font-size: 14px; font-weight: 600; color: white; }
+  .gericht-badge { font-size: 11px; color: white; opacity: 0.85; }
+  .gericht-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13px;
+  }
+  .gericht-item:last-child { border-bottom: none; }
+  .gericht-item-left .item-shop {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
 </style>
 </head>
 <body>
@@ -501,7 +559,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.6</span></p>
+    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.7</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -532,31 +590,47 @@
   <div class="section-label">Gerichte auswählen</div>
   <div class="dishes" id="dishes"></div>
 
-  <div id="share-row" class="share-row" style="display:none">
-    <button class="share-btn" onclick="shareList()">🔗 Liste teilen</button>
-    <button class="reset-btn" style="align-self:center;" onclick="resetBought()">Einkaufsliste zurücksetzen</button>
-    <div class="share-toast" id="share-toast">✓ Link kopiert!</div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('einkauf')" id="tab-einkauf">🛒 Einkaufsliste</button>
+    <button class="tab-btn" onclick="switchTab('gericht')" id="tab-gericht">🍽️ Gerichten-View</button>
   </div>
-  <div class="section-label">Einkaufsliste</div>
-  <div id="result">
-    <div class="empty-state">
-      <div class="empty-icon">🛒</div>
-      Gericht auswählen um die Einkaufsliste zu generieren
+
+  <!-- Tab: Einkaufsliste -->
+  <div class="tab-panel active" id="panel-einkauf">
+    <div id="share-row" class="share-row" style="display:none">
+      <button class="share-btn" onclick="shareList()">🔗 Liste teilen</button>
+      <button class="reset-btn" style="align-self:center;" onclick="resetBought()">Einkaufsliste zurücksetzen</button>
+      <div class="share-toast" id="share-toast">✓ Link kopiert!</div>
+    </div>
+    <div id="result">
+      <div class="empty-state">
+        <div class="empty-icon">🛒</div>
+        Gericht auswählen um die Einkaufsliste zu generieren
+      </div>
+    </div>
+    <div class="section-label" style="margin-top:1.5rem">Aus dem Lager mitnehmen</div>
+    <div class="checklist-wrap">
+      <div class="checklist-header" onclick="toggleChecklist()">
+        <div class="checklist-header-left">
+          <span class="checklist-title">Verbrauchsmaterial & Zubehör</span>
+          <span class="checklist-count" id="check-count">0 / 24</span>
+        </div>
+        <span class="chevron open" id="chevron">▾</span>
+      </div>
+      <div id="checklist-items" class="checklist-items"></div>
+      <div class="reset-row">
+        <button class="reset-btn" onclick="resetChecks()">Verbrauchsmaterial & Zubehör zurücksetzen</button>
+      </div>
     </div>
   </div>
 
-  <div class="section-label">Aus dem Lager mitnehmen</div>
-  <div class="checklist-wrap">
-    <div class="checklist-header" onclick="toggleChecklist()">
-      <div class="checklist-header-left">
-        <span class="checklist-title">Verbrauchsmaterial & Zubehör</span>
-        <span class="checklist-count" id="check-count">0 / 24</span>
+  <!-- Tab: Gerichten-View -->
+  <div class="tab-panel" id="panel-gericht">
+    <div id="gericht-result">
+      <div class="empty-state">
+        <div class="empty-icon">🍽️</div>
+        Gericht auswählen um die Zutatenliste zu sehen
       </div>
-      <span class="chevron open" id="chevron">▾</span>
-    </div>
-    <div id="checklist-items" class="checklist-items"></div>
-    <div class="reset-row">
-      <button class="reset-btn" onclick="resetChecks()">Alle zurücksetzen</button>
     </div>
   </div>
 
@@ -761,6 +835,7 @@ function renderResult() {
 
   res.innerHTML = html;
   renderChecklist();
+  if (document.getElementById('panel-gericht').classList.contains('active')) renderGerichtView();
 }
 
 function toggleBought(shop, item) {
@@ -773,6 +848,45 @@ function toggleBought(shop, item) {
 function resetBought() {
   boughtItems.clear();
   renderResult();
+}
+
+function switchTab(tab) {
+  document.getElementById('panel-einkauf').classList.toggle('active', tab === 'einkauf');
+  document.getElementById('panel-gericht').classList.toggle('active', tab === 'gericht');
+  document.getElementById('tab-einkauf').classList.toggle('active', tab === 'einkauf');
+  document.getElementById('tab-gericht').classList.toggle('active', tab === 'gericht');
+  if (tab === 'gericht') renderGerichtView();
+}
+
+function renderGerichtView() {
+  const res = document.getElementById('gericht-result');
+  const active = dishNames.filter(n => selections[n].active && selections[n].portions > 0);
+  if (!active.length) {
+    res.innerHTML = '<div class="empty-state"><div class="empty-icon">🍽️</div>Gericht auswählen um die Zutatenliste zu sehen</div>';
+    return;
+  }
+  let html = '';
+  active.forEach(name => {
+    const factor = selections[name].portions / BASE[name].base;
+    html += `<div class="gericht-block">
+      <div class="gericht-header">
+        <span class="gericht-title">${name}</span>
+        <span class="gericht-badge">${selections[name].portions} Portionen</span>
+      </div>`;
+    Object.entries(BASE[name].shops).forEach(([shop, items]) => {
+      items.forEach(([item, qty, unit]) => {
+        html += `<div class="gericht-item">
+          <div class="gericht-item-left">
+            <div class="item-name">${item}</div>
+            <div class="item-shop">${shop}</div>
+          </div>
+          <span class="shop-item-qty">${fmt(qty * factor, unit)}</span>
+        </div>`;
+      });
+    });
+    html += '</div>';
+  });
+  res.innerHTML = html;
 }
 
 function backToShopping() {
