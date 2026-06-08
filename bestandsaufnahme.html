@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bauch-Laden Bestandsaufnahme</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #FF9A00;
+  --orange-light: #FFF4E0;
+  --orange-dim: #FF9A0018;
+  --red: #e74c3c;
+  --red-light: #fdecea;
+  --green: #27ae60;
+  --green-light: #eafaf1;
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --border: #E8E6E0;
+  --border-light: #F0EEE8;
+  --text: #1A1A18;
+  --text-muted: #7A7870;
+  --text-subtle: #B0AEA8;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* Header */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { width: 36px; height: 36px; background: var(--orange); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.header-text h1 { font-size: 15px; font-weight: 600; }
+.header-text p { font-size: 12px; color: var(--text-muted); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.sync-btn { display: flex; align-items: center; gap: 6px; background: var(--orange); color: white; border: none; border-radius: var(--radius-sm); padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.sync-btn:disabled { opacity: 0.6; cursor: default; }
+.sync-status { font-size: 11px; color: var(--text-muted); }
+
+/* Auth banner */
+.auth-banner {
+  background: var(--orange-light);
+  border-bottom: 1px solid var(--orange);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.auth-banner p { font-size: 13px; color: #a06000; }
+.auth-btn { background: var(--orange); color: white; border: none; border-radius: var(--radius-sm); padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* Tabs */
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+.tab-btn { flex: 1; padding: 12px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; background: none; border: none; border-bottom: 2.5px solid transparent; cursor: pointer; color: var(--text-muted); margin-bottom: -1px; }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* Main */
+.main { max-width: 800px; margin: 0 auto; padding: 20px 16px 80px; }
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  flex: 1;
+  min-width: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  text-align: center;
+}
+.stat-card.red { background: var(--red-light); border-color: var(--red); }
+.stat-val { font-size: 22px; font-weight: 600; font-family: 'DM Mono', monospace; }
+.stat-card.red .stat-val { color: var(--red); }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* Table */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.table-header { display: grid; grid-template-columns: 1fr 110px 100px 100px 40px; gap: 0; background: var(--bg); border-bottom: 1px solid var(--border); padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.table-row { display: grid; grid-template-columns: 1fr 110px 100px 100px 40px; gap: 0; align-items: center; padding: 0 14px; border-bottom: 1px solid var(--border-light); min-height: 46px; transition: background 0.1s; }
+.table-row:last-child { border-bottom: none; }
+.table-row.low { background: var(--red-light); }
+.table-row.low .item-name { color: var(--red); font-weight: 500; }
+.table-row:hover { background: var(--bg); }
+.table-row.low:hover { background: #fbd7d4; }
+
+.item-name { font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 8px 0; }
+.low-badge { font-size: 9px; background: var(--red); color: white; border-radius: 20px; padding: 1px 6px; white-space: nowrap; }
+
+.cell-input {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cell-input:focus { border-color: var(--orange); background: var(--orange-light); }
+.cell-input.eisen { color: var(--red); }
+.table-row.low .cell-input.menge { color: var(--red); font-weight: 600; }
+
+.del-btn { background: none; border: none; cursor: pointer; color: var(--text-subtle); font-size: 16px; padding: 4px; border-radius: 4px; }
+.del-btn:hover { color: var(--red); background: var(--red-light); }
+
+/* Add row */
+.add-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.add-input { flex: 1; min-width: 120px; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; background: var(--surface); }
+.add-input:focus { border-color: var(--orange); }
+.add-btn { background: var(--orange); color: white; border: none; border-radius: var(--radius-sm); padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A18; color: white; border-radius: 20px; padding: 10px 20px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+.toast.show { opacity: 1; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .table-header, .table-row { grid-template-columns: 1fr 80px 80px 80px 32px; padding: 0 10px; font-size: 12px; }
+  .cell-input { font-size: 12px; padding: 4px 4px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📦</div>
+  <div class="header-text">
+    <h1>Bauch-Laden Bestandsaufnahme</h1>
+    <p id="last-sync">Noch nicht synchronisiert</p>
+  </div>
+  <div class="header-right">
+    <button class="sync-btn" id="sync-btn" onclick="saveToSheets()">💾 Speichern</button>
+  </div>
+</header>
+
+<div class="auth-banner" id="auth-banner">
+  <p>🔐 Bitte mit Google anmelden um Daten zu laden und zu speichern.</p>
+  <button class="auth-btn" onclick="signIn()">Mit Google anmelden</button>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('truck')" id="tab-truck">🚚 Food-Truck</button>
+  <button class="tab-btn" onclick="switchTab('lager')" id="tab-lager">🏭 Lager</button>
+</div>
+
+<div class="main">
+  <div id="stats-bar" class="stats-bar"></div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div>Zutat</div>
+      <div style="text-align:center">Verpackung</div>
+      <div style="text-align:center">Menge</div>
+      <div style="text-align:center">Eisenmenge</div>
+      <div></div>
+    </div>
+    <div id="table-body"></div>
+  </div>
+  <div class="add-row">
+    <input class="add-input" id="new-name" placeholder="Neue Zutat..." onkeydown="if(event.key==='Enter')addRow()">
+    <input class="add-input" id="new-pack" placeholder="Verpackung..." style="max-width:140px" onkeydown="if(event.key==='Enter')addRow()">
+    <button class="add-btn" onclick="addRow()">+ Hinzufügen</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CLIENT_ID = '365188445705-sb6ps80cb1v2llir0llpipnca44da521.apps.googleusercontent.com';
+const SHEET_ID = '15VGWYL9YMFUy-IKrWB-ULbRn5fd7aDtU4vLb2Qy66P8';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+const TRUCK_ITEMS = [
+  "Ajvar","Backpapier","Balsamico","Bodenreiniger (Essig)","Bulgur (sehr fein)",
+  "Cumin","Datteln","Desinfektionsmittel","Feigenmarmelade","Fliegenfänger",
+  "Frischhaltefolie","Gabel","Spülmittel","Getrocknete Tomaten","Gewürzgurken",
+  "Handschuhe L","Handschuhe M","Handschuhe S","Handschuhe XL","Insekten Spray",
+  "Kassen-Bon-Rolle Groß","Kassen-Bon-Rolle Klein","Kichererbsen","Linsen","Löffel",
+  "Mais","Maiskölbchen","Majoran","Mülltüte klein","Mülltüte groß","Nachos/Chips",
+  "Granatapfelsirup","Oliven","Olivenöl","Oregano","Paprikamark",
+  "Paprikapulver Scharf","Paprikapulver Süß","Petersilie","Pfeffer","Reis",
+  "Rotkohl","Salz","Servietten","Sumak","Tabasco","Tahini",
+  "Teller (Pappteller Mega)","Teller (Bowl Pleta)","Teller (Klassik Pleta)",
+  "Tomaten","Tomatenmark","Tork Tücher","Spüllappen","Wasser","Ziegenkäse",
+  "Zitronen (Saft)","Zucker"
+];
+
+const LAGER_ITEMS = [
+  "Getrocknete Tomaten 1,5kg Glas","Oliven 2kg Dose","Ajvar 2.5kg Glas",
+  "Balsamico 1 Lt","Olivenöl 750 ml","Oregano 150 gr","Majoran 150 gr",
+  "Dattel 1kg","Feigen Marmelade 370 gr","Gewürzgurken 11,4 kg",
+  "Maiskölbchen 1,3kg Glas","Mais 500 gr Dose","Rotkohl 650 gr Glas",
+  "Kichererbsen 2,5kg Dose","Tahini 1kg Dose","Bulgur (sehr fein) 1kg",
+  "Tomatenmark 300 gr","Paprikamark 300 gr","Sonnenblumenöl 1lt",
+  "Duftreis 0,5kg","Granatapfelsyrup 250 ml","Tortilla 15 Stück",
+  "Zitronensaft Bio 150 ml","Gouda Käse 1kg","Mozzarella Käse 1kg",
+  "Ziegenkäse 1kg","Pleta Klassik Teller","Pleta Bowl Teller","Backpapier",
+  "Pappteller 250 Stck","Holzgabel 100 Stck","Holzlöffel 100 Stck",
+  "Servietten 100 Stck","Handschuhe S 100 Stck","Handschuhe M 100 Stck",
+  "Handschuhe L 100 Stck","Handschuhe XL 100 Stck","Tork Tücher 100 Stck",
+  "Mülltüte 60 Lt 10 Stck","Mülltüte 120 Lt 10 Stck"
+];
+
+let currentTab = 'truck';
+let truckData = [];
+let lagerData = [];
+let tokenClient = null;
+let accessToken = null;
+
+// Initialize Google Identity Services
+function initGSI() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showToast('❌ Anmeldung fehlgeschlagen'); return; }
+      accessToken = resp.access_token;
+      document.getElementById('auth-banner').style.display = 'none';
+      showToast('✓ Angemeldet');
+      loadFromSheets();
+    }
+  });
+}
+
+function signIn() { tokenClient.requestAccessToken(); }
+
+// Init local data from predefined lists
+function initData() {
+  truckData = TRUCK_ITEMS.map(name => ({ name, pack: '', menge: '', eisen: '' }));
+  lagerData = LAGER_ITEMS.map(name => {
+    // Split name and pack size if included
+    const match = name.match(/^(.+?)\s+([\d,.]+\s*(?:gr|kg|lt|ml|Stck|Stück|Glas|Dose|Lt))$/i);
+    if (match) return { name: match[1], pack: match[2], menge: '', eisen: '' };
+    return { name, pack: '', menge: '', eisen: '' };
+  });
+}
+
+// Load from Google Sheets
+async function loadFromSheets() {
+  if (!accessToken) return;
+  showToast('⏳ Lade Daten...');
+  try {
+    const sheetName = currentTab === 'truck' ? 'Food-Truck' : 'Lager';
+    const resp = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A2:D200`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const data = await resp.json();
+    if (data.values && data.values.length) {
+      const loaded = data.values.map(row => ({
+        name: row[0] || '',
+        pack: row[1] || '',
+        menge: row[2] || '',
+        eisen: row[3] || ''
+      })).filter(r => r.name);
+      if (currentTab === 'truck') truckData = loaded;
+      else lagerData = loaded;
+      showToast('✓ Daten geladen');
+    } else {
+      // Sheet empty — write headers + initial data
+      await initSheet(sheetName);
+      showToast('✓ Sheet initialisiert');
+    }
+    updateLastSync();
+    render();
+  } catch(e) {
+    showToast('❌ Fehler beim Laden');
+    render();
+  }
+}
+
+async function initSheet(sheetName) {
+  const data = currentTab === 'truck' ? truckData : lagerData;
+  const values = [
+    ['Zutat', 'Verpackung', 'Verfügbare Menge', 'Eisenmenge'],
+    ...data.map(r => [r.name, r.pack, r.menge, r.eisen])
+  ];
+  await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:D${values.length}?valueInputOption=RAW`,
+    {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values })
+    }
+  );
+}
+
+async function saveToSheets() {
+  if (!accessToken) { showToast('⚠️ Bitte zuerst anmelden'); return; }
+  const btn = document.getElementById('sync-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Speichern...';
+  try {
+    const sheetName = currentTab === 'truck' ? 'Food-Truck' : 'Lager';
+    const data = currentTab === 'truck' ? truckData : lagerData;
+    const values = [
+      ['Zutat', 'Verpackung', 'Verfügbare Menge', 'Eisenmenge'],
+      ...data.map(r => [r.name, r.pack, r.menge, r.eisen])
+    ];
+    await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:D${values.length}?valueInputOption=RAW`,
+      {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values })
+      }
+    );
+    showToast('✓ Gespeichert');
+    updateLastSync();
+  } catch(e) {
+    showToast('❌ Fehler beim Speichern');
+  }
+  btn.disabled = false;
+  btn.textContent = '💾 Speichern';
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-truck').classList.toggle('active', tab === 'truck');
+  document.getElementById('tab-lager').classList.toggle('active', tab === 'lager');
+  if (accessToken) loadFromSheets();
+  else render();
+}
+
+function getData() { return currentTab === 'truck' ? truckData : lagerData; }
+
+function render() {
+  const data = getData();
+  const body = document.getElementById('table-body');
+  const lowCount = data.filter(r => isLow(r)).length;
+  const totalCount = data.length;
+
+  // Stats
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${totalCount}</div><div class="stat-label">Zutaten gesamt</div></div>
+    <div class="stat-card${lowCount > 0 ? ' red' : ''}"><div class="stat-val">${lowCount}</div><div class="stat-label">Unter Eisenmenge</div></div>
+    <div class="stat-card"><div class="stat-val">${data.filter(r => r.menge).length}</div><div class="stat-label">Erfasst</div></div>
+  `;
+
+  body.innerHTML = data.map((row, i) => {
+    const low = isLow(row);
+    return `<div class="table-row${low ? ' low' : ''}">
+      <div class="item-name">
+        ${row.name}
+        ${low ? '<span class="low-badge">⚠ Nachbestellen</span>' : ''}
+      </div>
+      <input class="cell-input" value="${esc(row.pack)}" placeholder="z.B. 750ml" oninput="update(${i},'pack',this.value)">
+      <input class="cell-input menge" value="${esc(row.menge)}" placeholder="0" oninput="update(${i},'menge',this.value)">
+      <input class="cell-input eisen" value="${esc(row.eisen)}" placeholder="min." oninput="update(${i},'eisen',this.value)">
+      <button class="del-btn" onclick="deleteRow(${i})" title="Löschen">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function isLow(row) {
+  if (!row.menge || !row.eisen) return false;
+  const m = parseFloat(row.menge.replace(',', '.'));
+  const e = parseFloat(row.eisen.replace(',', '.'));
+  return !isNaN(m) && !isNaN(e) && m < e;
+}
+
+function esc(v) { return (v||'').replace(/"/g,'&quot;'); }
+
+function update(i, field, val) {
+  getData()[i][field] = val;
+  // Re-check low status without full re-render
+  const rows = document.getElementById('table-body').children;
+  const row = getData()[i];
+  const low = isLow(row);
+  rows[i].className = 'table-row' + (low ? ' low' : '');
+  // Update badge
+  const nameEl = rows[i].querySelector('.item-name');
+  const existing = nameEl.querySelector('.low-badge');
+  if (low && !existing) {
+    nameEl.insertAdjacentHTML('beforeend', '<span class="low-badge">⚠ Nachbestellen</span>');
+  } else if (!low && existing) {
+    existing.remove();
+  }
+  // Update stats
+  const data = getData();
+  const lowCount = data.filter(r => isLow(r)).length;
+  const statsCards = document.querySelectorAll('.stat-card');
+  if (statsCards[1]) {
+    statsCards[1].className = 'stat-card' + (lowCount > 0 ? ' red' : '');
+    statsCards[1].querySelector('.stat-val').textContent = lowCount;
+  }
+  if (statsCards[2]) statsCards[2].querySelector('.stat-val').textContent = data.filter(r => r.menge).length;
+}
+
+function addRow() {
+  const name = document.getElementById('new-name').value.trim();
+  const pack = document.getElementById('new-pack').value.trim();
+  if (!name) return;
+  getData().push({ name, pack, menge: '', eisen: '' });
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-pack').value = '';
+  render();
+}
+
+function deleteRow(i) {
+  getData().splice(i, 1);
+  render();
+}
+
+function updateLastSync() {
+  const now = new Date();
+  document.getElementById('last-sync').textContent =
+    `Zuletzt synchronisiert: ${now.toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'})}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Init
+initData();
+render();
+
+// Load Google Identity Services
+const gsiScript = document.createElement('script');
+gsiScript.src = 'https://accounts.google.com/gsi/client';
+gsiScript.onload = initGSI;
+document.head.appendChild(gsiScript);
+</script>
+</body>
+</html>
