@@ -445,54 +445,66 @@
     text-align: center;
   }
 
-  /* Einkaufsliste tick */
+  /* Einkaufsliste — zwei Checkboxen */
   .shop-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 9px 14px;
+    padding: 8px 14px;
     border-bottom: 1px solid var(--border-light);
     font-size: 13px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.1s;
+    gap: 10px;
   }
   .shop-item:last-child { border-bottom: none; }
-  .shop-item.bought {
-    background: #f5f5f2;
-  }
-  .shop-item.bought .shop-item-name {
+  .shop-item.status-truck .shop-item-name {
     text-decoration: line-through;
     color: var(--text-subtle);
   }
-  .shop-item.bought .shop-item-qty {
+  .shop-item.status-truck .shop-item-qty {
     color: var(--text-subtle);
     background: var(--border-light);
   }
-  .shop-tick {
-    width: 20px;
-    height: 20px;
+  .shop-item-name { flex: 1; }
+  .item-checks {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .item-check-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .item-check-label {
+    font-size: 9px;
+    color: var(--text-subtle);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 44px;
+  }
+  .item-check-box {
+    width: 22px;
+    height: 22px;
     border-radius: 6px;
     border: 1.5px solid var(--border);
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 10px;
     transition: background 0.1s, border-color 0.1s;
-  }
-  .shop-item.bought .shop-tick {
-    background: #b0b0a8;
-    border-color: #b0b0a8;
-  }
-  .shop-tick-mark {
-    display: none;
+    font-size: 12px;
     color: white;
-    font-size: 11px;
     font-weight: 700;
-    line-height: 1;
   }
-  .shop-item.bought .shop-tick-mark { display: block; }
+  .item-check-box.checked-lager {
+    background: #4a90d9;
+    border-color: #4a90d9;
+  }
+  .item-check-box.checked-truck {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
 
   .tabs {
     display: flex;
@@ -551,6 +563,144 @@
     color: var(--text-muted);
     margin-top: 1px;
   }
+
+  /* Woanders kaufen */
+  .redirect-badge {
+    font-size: 10px;
+    color: #c47000;
+    background: #FFF0CC;
+    border: 1px solid #FFD580;
+    border-radius: 20px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    white-space: nowrap;
+  }
+  .redirect-btn {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .redirect-btn:hover { background: var(--border-light); }
+
+  /* Redirect modal */
+  .redirect-modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  .redirect-modal-bg.open { display: flex; }
+  .redirect-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 20px;
+    max-width: 300px;
+    width: 90%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  }
+  .redirect-modal h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .redirect-modal p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+  .redirect-shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .redirect-shop-btn {
+    padding: 9px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: none;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    text-align: left;
+    transition: border-color 0.1s, background 0.1s;
+  }
+  .redirect-shop-btn:hover { border-color: var(--orange); background: var(--orange-light); }
+  .redirect-cancel {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: none;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-muted);
+  }
+
+  /* Lager grid & items */
+  .lager-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 6px;
+    padding: 12px;
+  }
+  .lager-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    padding: 8px 10px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid var(--border-light);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .lager-item.checked {
+    background: #FFF4E0;
+    border-color: var(--orange);
+  }
+  .lager-item.checked .check-item-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+  .check {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .lager-item.checked .check {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+  .check-mark {
+    display: none;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .lager-item.checked .check-mark { display: block; }
 </style>
 </head>
 <body>
@@ -559,7 +709,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v1.7</span></p>
+    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v2.7</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -636,53 +786,63 @@
 
 </div>
 
+<!-- Woanders kaufen Modal -->
+<div class="redirect-modal-bg" id="redirect-modal-bg">
+  <div class="redirect-modal">
+    <h3>🔀 Woanders kaufen</h3>
+    <p id="redirect-item-label">Artikel zu anderem Laden verschieben</p>
+    <div class="redirect-shop-list" id="redirect-shop-list"></div>
+    <button class="redirect-cancel" onclick="closeRedirectModal()">Abbrechen</button>
+  </div>
+</div>
+
 <script>
 const BASE = {
   "Klassik Fladenbrot": { base: 30, shops: {
     "Gaziantep": [["Fladenbrot", 8, "Stück"]],
     "Lidl": [["Olivenöl", 833, "ml"]],
-    "Selgros": [["Kalamata Oliven", 750, "g"], ["Gouda Käse (Schnitt)", 2000, "g"], ["Getrocknete Tomaten", 1, "Pck."], ["Ajvar", 1500, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]],
-    "Mega": [["Rucola (gewaschen)", 250, "g"], ["Mozzarella (Schnitt)", 1000, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."]]
+    "Selgros": [["Kalamata Oliven", 750, "g"], ["Getrocknete Tomaten", 1, "Pck."]],
+    "Mega": [["Rucola (gewaschen)", 250, "g"], ["Mozzarella (Schnitt)", 1000, "g"], ["Gouda Käse (Schnitt)", 2000, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."], ["Ajvar", 1500, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]]
   }},
   "Oriental Fladenbrot": { base: 30, shops: {
     "Gaziantep": [["Fladenbrot", 8, "Stück"]],
     "Lidl": [["Olivenöl", 833, "ml"]],
-    "Hedef Süpermarkt": [["Datteln", 750, "g"]],
-    "Selgros": [["Feigenmarmelade", 4, "Glas"], ["Ziegenkäse", 2000, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]],
-    "Mega": [["Rucola (gewaschen)", 50, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."]]
+    "Türkischer Supermarkt (Hedef/Hakverdi)": [["Datteln", 750, "g"]],
+    "Selgros": [["Feigenmarmelade", 4, "Glas"], ["Ziegenkäse", 2000, "g"]],
+    "Mega": [["Rucola (gewaschen)", 50, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]]
   }},
   "Gözleme Kartoffel": { base: 20, shops: {
     "Gaziantep": [["Gözleme (Kartoffel)", 20, "Stück"]],
-    "Selgros": [["Kalamata Oliven", 750, "g"], ["Ajvar", 1500, "g"]],
-    "Mega": [["Mega Mix (gemischter Salat)", 1500, "g"], ["Balsamico", 1, "Fl."]]
+    "Selgros": [["Kalamata Oliven", 750, "g"]],
+    "Mega": [["Mega Mix (gemischter Salat)", 1500, "g"], ["Balsamico", 1, "Fl."], ["Ajvar", 1500, "g"]]
   }},
   "Gözleme Spinat-Käse": { base: 20, shops: {
     "Gaziantep": [["Gözleme (Spinat-Käse)", 20, "Stück"]],
-    "Selgros": [["Kalamata Oliven", 750, "g"], ["Ajvar", 1500, "g"]],
-    "Mega": [["Mega Mix (gemischter Salat)", 1500, "g"], ["Balsamico", 1, "Fl."]]
+    "Selgros": [["Kalamata Oliven", 750, "g"]],
+    "Mega": [["Mega Mix (gemischter Salat)", 1500, "g"], ["Balsamico", 1, "Fl."], ["Ajvar", 1500, "g"]]
   }},
   "Çiğ Köfte": { base: 35, shops: {
-    "Hedef Süpermarkt": [["Arabisches Fladenbrot", 35, "Stück"], ["Bulgur (sehr fein)", 1800, "g"], ["Paprikamark", 400, "g"], ["Tomatenmark", 250, "g"], ["Granatapfelsirup", 200, "g"]],
-    "Mega": [["Zwiebeln", 1200, "g"], ["Eisbergsalat", 5, "Kopf/Köpfe"], ["Minze", 2, "Bund"], ["Petersilie (geschnitten)", 2, "Bund"], ["Tortilla Chips Natur", 500, "g"], ["Pfeffer", 2, "TL"], ["Kreuzkümmel", 8, "TL"], ["Sumach", 10, "TL"]],
-    "Selgros": [["Knoblauchzehen", 16, "Stück"], ["Paprikapulver (süß)", 9, "TL"]],
-    "Lidl": [["Tomaten", 1000, "g"], ["Gurken", 5, "Stück"], ["Olivenöl", 667, "ml"], ["Zitronensaft", 50, "g"], ["Zucker", 8, "TL"], ["Salz", 8, "TL"], ["Wasser", 1500, "ml"]]
+    "Türkischer Supermarkt (Hedef/Hakverdi)": [["Arabisches Fladenbrot", 35, "Stück"], ["Bulgur (sehr fein)", 1800, "g"], ["Paprikamark", 400, "g"], ["Granatapfelsirup", 200, "g"], ["Sumach", 10, "TL"]],
+    "Mega": [["Zwiebeln", 1200, "g"], ["Eisbergsalat", 5, "Kopf/Köpfe"], ["Minze", 2, "Bund"], ["Petersilie (geschnitten)", 2, "Bund"], ["Tortilla Chips Natur", 500, "g"], ["Salz", 8, "TL"], ["Kreuzkümmel", 8, "TL"], ["Pfeffer", 2, "TL"], ["Paprikapulver (süß)", 9, "TL"]],
+    "Lidl": [["Knoblauchzehen", 16, "Stück"]],
+    "Lidl": [["Tomaten", 1000, "g"], ["Gurken", 5, "Stück"], ["Olivenöl", 667, "ml"], ["Zitronensaft", 50, "g"], ["Rohrzucker", 32, "g"], ["Wasser", 1500, "ml"], ["Tomatenmark", 250, "g"]]
   }},
   "Hummus-Bowl": { base: 20, shops: {
     "Gaziantep": [["Fladenbrot", 3, "Stück"]],
-    "Lidl": [["Duftreis", 1000, "g"], ["Cherry-Tomaten", 15, "Stück"], ["Olivenöl", 89, "ml"], ["Zitronensaft", 40, "g"], ["Wasser", 1000, "ml"]],
-    "Selgros": [["Mais (abgetropft)", 570, "g"], ["Kichererbsen — Bowl", 1600, "g"], ["Rotkohlsalat", 750, "g"], ["Zaziki", 750, "g"], ["Ajvar", 750, "g"], ["Tahin", 80, "g"], ["Kichererbsen — Hummus", 800, "g"], ["Kichererbsensaft", 200, "g"], ["Knoblauchzehen", 2, "Stück"], ["Salz", 2.4, "TL"], ["Kreuzkümmel", 1, "TL"], ["Cayennepfeffer", 0.1, "g"], ["Gewürzmischung (Cumin, Cayenne, Salz)", 1, "Pck."], ["Eingelegte Mini-Gurken", 15, "Stück"], ["Geschnittene Gurke / Maiskölbchen", 500, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]],
-    "Mega": [["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 1, "Fl."], ["Petersilie (geschnitten)", 0.5, "Bund"]]
+    "Lidl": [["Duftreis", 1000, "g"], ["Cherry-Tomaten", 15, "Stück"], ["Olivenöl", 89, "ml"], ["Zitronensaft", 45, "g"], ["Wasser", 1000, "ml"], ["Knoblauchzehen", 2, "Stück"]],
+    "Selgros": [["Mais (abgetropft)", 570, "g"], ["Kichererbsen — Bowl", 1600, "g"], ["Rotkohlsalat", 750, "g"], ["Zaziki", 750, "g"], ["Tahin", 100, "g"], ["Kichererbsen — Hummus", 750, "g"], ["Kichererbsensaft", 200, "g"], ["Eingelegte Mini-Gurken", 15, "Stück"], ["Geschnittene Gurke / Maiskölbchen", 500, "g"], ],
+    "Mega": [["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 1, "Fl."], ["Petersilie (geschnitten)", 0.5, "Bund"], ["Ajvar", 750, "g"], ["Salz", 2.2, "TL"], ["Kreuzkümmel", 1, "TL"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."], ["Cayennepfeffer", 0.1, "g"], ["Gewürzmischung (Cumin, Cayenne, Salz)", 1, "Pck."]]
   }},
   "Linsensuppe": { base: 30, shops: {
-    "Lidl": [["Olivenöl", 89, "ml"], ["Zwiebeln (gewürfelt)", 300, "g"], ["Kartoffeln", 400, "g"], ["Tomatenmark", 200, "g"], ["Zitronen", 2, "Stück"]],
+    "Lidl": [["Olivenöl", 89, "ml"], ["Zwiebeln", 300, "g"], ["Kartoffeln", 400, "g"], ["Tomatenmark", 200, "g"], ["Zitronen", 2, "Stück"]],
     "Mega": [["Karotten (gerieben)", 300, "g"]],
     "DM": [["Rote Linsen", 750, "g"], ["Gemüsebrühe", 40, "g"]],
-    "Hedef Süpermarkt": [["Arabisches Fladenbrot", 30, "Stück"]]
+    "Türkischer Supermarkt (Hedef/Hakverdi)": [["Arabisches Fladenbrot", 30, "Stück"]]
   }},
   "Salep": { base: 20, shops: {
-    "Hakverdi": [["Ahinur Salep Pulver", 400, "g"]],
+    "Türkischer Supermarkt (Hedef/Hakverdi)": [["Ahinur Salep Pulver", 400, "g"]],
     "Lidl": [["Haferdrink", 2000, "ml"], ["Sojadrink", 2000, "ml"], ["Walnüsse", 100, "g"], ["Rohrzucker", 80, "g"]],
-    "Selgros": [["Zimtpulver", 20, "g"]]
+    "Mega": [["Zimtpulver", 20, "g"]]
   }},
   "Kichererbsen-Eintopf": { base: 30, shops: {
     "Selgros": [["Kichererbsen (Dose)", 2, "Dose(n)"], ["Zaziki", 1500, "g"]],
@@ -700,14 +860,17 @@ const STATIC_ITEMS = [
   "Müllbeutel (35 l)", "Tabasco",
   "Pappbecher Glühwein — Internet", "Pappbecher Suppe — Internet",
   "Pappbecher Mokka — Internet", "Pappbecher Probe — Internet",
-  "Frische Basilikum (2×) — Lidl", "Backpapier 100m Profi — Selgros"
+  "Frische Basilikum (2×) — Lidl", "Backpapier 100m Profi — Selgros",
+  "Schürze", "Küchentücher"
 ];
+
 
 const dishNames = Object.keys(BASE);
 const selections = {};
 dishNames.forEach(d => { selections[d] = { active: false, portions: BASE[d].base }; });
 const checked = new Set();
-const boughtItems = new Set();
+const lagerItems = new Set();
+const truckItems = new Set();
 let checklistOpen = true;
 
 // Returns calculated dynamic items based on active portions
@@ -801,27 +964,51 @@ function renderResult() {
   active.forEach(name => {
     const factor = selections[name].portions / BASE[name].base;
     Object.entries(BASE[name].shops).forEach(([shop, items]) => {
-      if (!combined[shop]) combined[shop] = {};
       items.forEach(([item, qty, unit]) => {
+        // Check if redirected to another shop
+        const redirectKey = shop + '|' + item;
+        const effectiveShop = itemRedirects[redirectKey] || shop;
+        if (!combined[effectiveShop]) combined[effectiveShop] = {};
         const key = item + '|' + unit;
-        if (!combined[shop][key]) combined[shop][key] = { item, qty: 0, unit };
-        combined[shop][key].qty += qty * factor;
+        if (!combined[effectiveShop][key]) combined[effectiveShop][key] = { item, qty: 0, unit, originalShop: shop };
+        else combined[effectiveShop][key].originalShop = combined[effectiveShop][key].originalShop || shop;
+        combined[effectiveShop][key].qty += qty * factor;
       });
     });
   });
 
   let html = '';
-  const shopOrder = ["Gaziantep","Hedef Süpermarkt","Hakverdi","Lidl","Mega","Selgros","DM","Türkischer Markt"];
+  const shopOrder = ["Gaziantep","Türkischer Supermarkt (Hedef/Hakverdi)","Hakverdi","Lidl","Mega","Selgros","DM","Türkischer Markt"];
   const allShops = [...new Set([...shopOrder, ...Object.keys(combined)])].filter(s => combined[s]);
   allShops.forEach(shop => {
     html += `<div class="shop-block"><div class="shop-name">${shop}</div>`;
-    Object.values(combined[shop]).forEach(({item, qty, unit}) => {
+    Object.values(combined[shop]).forEach(({item, qty, unit, originalShop}) => {
       const bkey = shop + '|' + item;
-      const isBought = boughtItems.has(bkey);
-      html += `<div class="shop-item${isBought?' bought':''}" onclick="toggleBought('${shop}','${item.replace(/'/g,'\'')}')">
-        <div class="shop-tick"><span class="shop-tick-mark">✓</span></div>
-        <span class="shop-item-name">${item}</span>
+      const isLager = lagerItems.has(bkey);
+      const isTruck = truckItems.has(bkey);
+      const statusClass = isTruck ? ' status-truck' : (isLager ? ' status-lager' : '');
+      const safeShop = shop.replace(/'/g, "\\'");
+      const safeItem = item.replace(/'/g, "\\'");
+      const origShop = originalShop || shop;
+      const redirectKey = origShop + '|' + item;
+      const redirectedTo = itemRedirects[redirectKey];
+      const isRedirected = redirectedTo && redirectedTo !== shop;
+      const redirectBadge = (redirectedTo && redirectedTo === shop) ? `<span class="redirect-badge">verschoben von ${origShop}</span>` : '';
+      const safeOrigShop = origShop.replace(/'/g, "\'");
+      html += `<div class="shop-item${statusClass}">
+        <span class="shop-item-name">${item}${redirectBadge}</span>
         <span class="shop-item-qty">${fmt(qty, unit)}</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem('${safeShop}','${safeItem}')">
+            <div class="item-check-box${isLager||isTruck?' checked-lager':''}">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem('${safeShop}','${safeItem}')">
+            <div class="item-check-box${isTruck?' checked-truck':''}">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal('${safeOrigShop}','${safeItem}','${fmt(qty,unit).replace(/'/g,"\\'")}','${safeShop}')">🔀</button>
+        </div>
       </div>`;
     });
     html += '</div>';
@@ -838,17 +1025,74 @@ function renderResult() {
   if (document.getElementById('panel-gericht').classList.contains('active')) renderGerichtView();
 }
 
-function toggleBought(shop, item) {
+function toggleLagerItem(shop, item) {
   const key = shop + '|' + item;
-  if (boughtItems.has(key)) boughtItems.delete(key);
-  else boughtItems.add(key);
+  if (lagerItems.has(key)) {
+    lagerItems.delete(key);
+    truckItems.delete(key);
+  } else {
+    lagerItems.add(key);
+  }
+  renderResult();
+}
+
+function toggleTruckItem(shop, item) {
+  const key = shop + '|' + item;
+  if (truckItems.has(key)) {
+    truckItems.delete(key);
+  } else {
+    truckItems.add(key);
+    lagerItems.add(key); // auto-check lager too
+  }
   renderResult();
 }
 
 function resetBought() {
-  boughtItems.clear();
+  lagerItems.clear();
+  truckItems.clear();
   renderResult();
 }
+
+// item redirects: "originalShop|item" -> "newShop"
+const itemRedirects = {};
+
+const ALL_SHOPS = ["Gaziantep","Türkischer Supermarkt (Hedef/Hakverdi)","Lidl","Mega","Selgros","DM","Rewe","Kaufland","Edeka","Sonstiges"];
+
+function openRedirectModal(origShop, item, qty, currentShop) {
+  const bg = document.getElementById('redirect-modal-bg');
+  const current = currentShop || origShop;
+  document.getElementById('redirect-item-label').textContent = `"${item}" (${qty}) — aktuell bei ${current}`;
+  const list = document.getElementById('redirect-shop-list');
+  const key = origShop + '|' + item;
+  list.innerHTML = '';
+  // Reset option if already redirected
+  if (itemRedirects[key]) {
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'redirect-shop-btn';
+    resetBtn.style.color = '#c0392b';
+    resetBtn.textContent = '✕ Zurücksetzen (wieder ' + origShop + ')';
+    resetBtn.onclick = () => { delete itemRedirects[key]; closeRedirectModal(); renderResult(); };
+    list.appendChild(resetBtn);
+  }
+  // All shops except current location
+  ALL_SHOPS.filter(s => s !== current).forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'redirect-shop-btn';
+    btn.textContent = s;
+    btn.onclick = () => { itemRedirects[key] = s; closeRedirectModal(); renderResult(); };
+    list.appendChild(btn);
+  });
+  bg.classList.add('open');
+}
+
+function closeRedirectModal() {
+  document.getElementById('redirect-modal-bg').classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  const bg = document.getElementById('redirect-modal-bg');
+  if (e.target === bg) closeRedirectModal();
+});
 
 function switchTab(tab) {
   document.getElementById('panel-einkauf').classList.toggle('active', tab === 'einkauf');
@@ -911,10 +1155,14 @@ function shareList() {
 
   let url = window.location.href.split('?')[0] + '?list=' + params.join(',');
 
-  // Encode bought items
-  if (boughtItems.size > 0) {
-    const boughtArr = [...boughtItems].map(k => encodeURIComponent(k));
-    url += '&bought=' + boughtArr.join(',');
+  // Encode lager + truck items
+  if (lagerItems.size > 0) {
+    const arr = [...lagerItems].map(k => encodeURIComponent(k));
+    url += '&lager=' + arr.join(',');
+  }
+  if (truckItems.size > 0) {
+    const arr = [...truckItems].map(k => encodeURIComponent(k));
+    url += '&truck=' + arr.join(',');
   }
 
   // Encode checked checklist items
@@ -947,11 +1195,11 @@ function loadFromURL() {
     }
   });
 
-  // Restore bought items
-  const boughtParam = params.get('bought');
-  if (boughtParam) {
-    boughtParam.split(',').forEach(k => boughtItems.add(decodeURIComponent(k)));
-  }
+  // Restore lager + truck items
+  const lagerParam = params.get('lager');
+  if (lagerParam) lagerParam.split(',').forEach(k => lagerItems.add(decodeURIComponent(k)));
+  const truckParam = params.get('truck');
+  if (truckParam) truckParam.split(',').forEach(k => truckItems.add(decodeURIComponent(k)));
 
   // Restore checked checklist items
   const tickedParam = params.get('ticked');
@@ -1001,6 +1249,10 @@ function toggleCheckKey(key) {
 function toggleCheck(i) { toggleCheckKey('s_' + i); }
 
 function resetChecks() { checked.clear(); renderChecklist(); }
+
+
+
+
 
 function toggleChecklist() {
   checklistOpen = !checklistOpen;
