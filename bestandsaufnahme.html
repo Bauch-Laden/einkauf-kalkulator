@@ -310,10 +310,12 @@ function initGSI() {
 function signIn() { tokenClient.requestAccessToken(); }
 
 async function loadBothTabs() {
+  showToast('⏳ Lade Daten...');
   await loadTab('lager');
-  truckData = buildTruckData(TRUCK_NAMES);
   await loadTab('truck');
+  updateLastSync();
   render();
+  showToast('✓ Daten geladen');
 }
 
 async function loadTab(tab) {
@@ -326,12 +328,21 @@ async function loadTab(tab) {
     );
     const data = await resp.json();
     if (data.values && data.values.length) {
+      // Sheet has data — load from sheet, deduplicate by name
       if (tab === 'truck') {
-        truckData = data.values.map(r => ({ name:r[0]||'', pack:r[1]||'', menge:r[2]||'' })).filter(r=>r.name);
+        const seen = new Set();
+        truckData = data.values
+          .map(r => ({ name:r[0]||'', pack:r[1]||'', menge:r[2]||'' }))
+          .filter(r => { if (!r.name || seen.has(r.name)) return false; seen.add(r.name); return true; });
       } else {
-        lagerData = data.values.map(r => ({ name:r[0]||'', vendor:r[1]||'', pack:r[2]||'', menge:r[3]||'', eisen:r[4]||'' })).filter(r=>r.name);
+        const seen = new Set();
+        lagerData = data.values
+          .map(r => ({ name:r[0]||'', vendor:r[1]||'', pack:r[2]||'', menge:r[3]||'', eisen:r[4]||'' }))
+          .filter(r => { if (!r.name || seen.has(r.name)) return false; seen.add(r.name); return true; });
       }
     } else {
+      // Sheet empty — initialize with defaults (only once)
+      if (tab === 'truck') truckData = buildTruckData(TRUCK_NAMES);
       await initSheet(tab);
     }
   } catch(e) { showToast('❌ Fehler beim Laden'); }
