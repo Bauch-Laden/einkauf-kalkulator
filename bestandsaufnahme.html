@@ -135,7 +135,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.1</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.2</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -378,6 +378,12 @@ async function saveToSheets() {
 }
 
 async function writeSheet(sheetName, values) {
+  // First clear the entire sheet to remove stale rows
+  await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:F1000:clear`,
+    { method:'POST', headers:{ Authorization:`Bearer ${accessToken}` } }
+  );
+  // Then write fresh data
   await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:F${values.length}?valueInputOption=RAW`,
     { method:'PUT', headers:{ Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json' }, body:JSON.stringify({values}) }
