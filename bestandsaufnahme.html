@@ -123,6 +123,25 @@ header {
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A18; color: white; border-radius: 20px; padding: 10px 20px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 9999; white-space: nowrap; }
 .toast.show { opacity: 1; }
 
+/* Archive section */
+.archive-section { margin-top: 16px; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.archive-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; cursor: pointer; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.archive-header:hover { background: #F0EEE8; }
+.archive-title { font-size: 13px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.archive-count { font-size: 11px; background: var(--border); color: var(--text-muted); border-radius: 20px; padding: 1px 8px; }
+.archive-chevron { font-size: 16px; color: var(--text-muted); transition: transform 0.2s; }
+.archive-chevron.open { transform: rotate(180deg); }
+.archive-body { display: none; }
+.archive-body.open { display: block; }
+.archived-row { opacity: 0.6; }
+.restore-btn { font-size: 11px; color: #2a7a2a; background: #eafaea; border: 1px solid #b2e0b2; border-radius: 20px; padding: 3px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+.restore-btn:hover { background: #d0f0d0; }
+
 @media (max-width: 620px) {
   .lager-header, .lager-row { grid-template-columns: 120px 1fr 110px 80px 80px 36px; }
   .truck-header, .truck-row { grid-template-columns: 1fr 150px 100px 36px; }
@@ -135,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.2</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.3</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -169,10 +188,23 @@ header {
   <div id="add-row-wrap" style="display:none">
     <div class="add-row" id="add-row-fields"></div>
   </div>
+
+  <!-- Archive section — only visible in BO mode -->
+  <div class="archive-section" id="archive-section" style="display:none">
+    <div class="archive-header" onclick="toggleArchive()">
+      <div class="archive-title">
+        📦 Archivierte Zutaten
+        <span class="archive-count" id="archive-count">0</span>
+      </div>
+      <span class="archive-chevron" id="archive-chevron">▾</span>
+    </div>
+    <div class="archive-body" id="archive-body"></div>
+  </div>
 </div>
 
 <div class="ctx-menu" id="ctx-menu" style="display:none">
   <div class="ctx-item" onclick="editRow()">✏️ Bearbeiten</div>
+  <div class="ctx-item" onclick="archiveRow()">📦 Archivieren</div>
   <div class="ctx-item danger" onclick="deleteRow()">🗑 Löschen</div>
 </div>
 
@@ -332,12 +364,12 @@ async function loadTab(tab) {
       if (tab === 'truck') {
         const seen = new Set();
         truckData = data.values
-          .map(r => ({ name:r[0]||'', pack:r[1]||'', menge:r[2]||'' }))
+          .map(r => ({ name:r[0]||'', pack:r[1]||'', menge:r[2]||'', archived: r[3]==='ja' }))
           .filter(r => { if (!r.name || seen.has(r.name)) return false; seen.add(r.name); return true; });
       } else {
         const seen = new Set();
         lagerData = data.values
-          .map(r => ({ name:r[0]||'', vendor:r[1]||'', pack:r[2]||'', menge:r[3]||'', eisen:r[4]||'' }))
+          .map(r => ({ name:r[0]||'', vendor:r[1]||'', pack:r[2]||'', menge:r[3]||'', eisen:r[4]||'', archived: r[5]==='ja' }))
           .filter(r => { if (!r.name || seen.has(r.name)) return false; seen.add(r.name); return true; });
       }
     } else {
@@ -352,9 +384,9 @@ async function initSheet(tab) {
   const sheetName = tab === 'truck' ? 'Food-Truck' : 'Lager';
   let values;
   if (tab === 'truck') {
-    values = [['Zutat','Verpackung','Menge'], ...truckData.map(r=>[r.name,r.pack||'',r.menge||''])];
+    values = [['Zutat','Verpackung','Menge','Archiviert'], ...truckData.map(r=>[r.name,r.pack||'',r.menge||'',r.archived?'ja':''])];
   } else {
-    values = [['Zutat','Vendor','Verpackung','Menge','Eisenmenge'], ...lagerData.map(r=>[r.name,r.vendor||'',r.pack||'',r.menge||'',r.eisen||''])];
+    values = [['Zutat','Vendor','Verpackung','Menge','Eisenmenge','Archiviert'], ...lagerData.map(r=>[r.name,r.vendor||'',r.pack||'',r.menge||'',r.eisen||'',r.archived?'ja':''])];
   }
   await writeSheet(sheetName, values);
 }
@@ -367,9 +399,9 @@ async function saveToSheets() {
     const sheetName = currentTab === 'truck' ? 'Food-Truck' : 'Lager';
     let values;
     if (currentTab === 'truck') {
-      values = [['Zutat','Verpackung','Menge'], ...truckData.map(r=>[r.name,r.pack||'',r.menge||''])];
+      values = [['Zutat','Verpackung','Menge','Archiviert'], ...truckData.map(r=>[r.name,r.pack||'',r.menge||'',r.archived?'ja':''])];
     } else {
-      values = [['Zutat','Vendor','Verpackung','Menge','Eisenmenge'], ...lagerData.map(r=>[r.name,r.vendor||'',r.pack||'',r.menge||'',r.eisen||''])];
+      values = [['Zutat','Vendor','Verpackung','Menge','Eisenmenge','Archiviert'], ...lagerData.map(r=>[r.name,r.vendor||'',r.pack||'',r.menge||'',r.eisen||'',r.archived?'ja':''])];
     }
     await writeSheet(sheetName, values);
     showToast('✓ Gespeichert'); updateLastSync();
@@ -522,6 +554,74 @@ function confirmEdit() {
   closeEditModal(); render();
 }
 
+function archiveRow() {
+  closeCtx();
+  if (ctxIndex === null) return;
+  const data = getData();
+  const row = data[ctxIndex];
+  row.archived = true;
+  ctxIndex = null;
+  render();
+  showToast(`📦 "${row.name}" archiviert`);
+}
+
+function restoreRow(tab, i) {
+  const data = tab === 'truck' ? truckData : lagerData;
+  data[i].archived = false;
+  render();
+  showToast(`✓ "${data[i].name}" reaktiviert`);
+}
+
+let archiveOpen = false;
+function toggleArchive() {
+  archiveOpen = !archiveOpen;
+  document.getElementById('archive-body').classList.toggle('open', archiveOpen);
+  document.getElementById('archive-chevron').classList.toggle('open', archiveOpen);
+}
+
+function renderArchive() {
+  const data = getData();
+  const isTruck = currentTab === 'truck';
+  const archived = data.map((r, i) => ({r, i})).filter(({r}) => r.archived);
+  const section = document.getElementById('archive-section');
+  const count = document.getElementById('archive-count');
+  const body = document.getElementById('archive-body');
+
+  count.textContent = archived.length;
+
+  if (!isBO || archived.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+
+  const rowClass = isTruck ? 'truck-row' : 'lager-row';
+  body.innerHTML = archived.map(({r, i}) => {
+    const vendorTag = !isTruck && r.vendor ? `<span class="vendor-tag">${esc(r.vendor)}</span>` : '';
+    const packVal = r.pack ? esc(r.pack) : '—';
+    const nameCell = `<div class="item-name-cell"><span class="item-name-text" style="color:var(--text-muted)">${esc(r.name)}</span>${vendorTag}</div>`;
+    const restoreBtn = `<button class="restore-btn" onclick="restoreRow('${currentTab}',${i})">↩ Reaktivieren</button>`;
+
+    if (isTruck) {
+      return `<div class="${rowClass} table-row archived-row">
+        ${nameCell}
+        <div class="cell-val">${packVal}</div>
+        <div class="cell-val">${esc(r.menge||'—')}</div>
+        <div>${restoreBtn}</div>
+      </div>`;
+    } else {
+      return `<div class="${rowClass} table-row archived-row">
+        ${nameCell}
+        <div style="font-size:12px;color:var(--text-muted);padding:4px">${esc(r.vendor||'—')}</div>
+        <div class="cell-val">${packVal}</div>
+        <div class="cell-val">${esc(r.menge||'—')}</div>
+        <div class="cell-val" style="color:var(--red)">${esc(r.eisen||'—')}</div>
+        <div>${restoreBtn}</div>
+      </div>`;
+    }
+  }).join('');
+}
+
 function getData() { return currentTab === 'truck' ? truckData : lagerData; }
 function isLow(row) {
   if (!row.menge || !row.eisen) return false;
@@ -559,8 +659,9 @@ function render() {
     ? `<div class="truck-header"><div>Zutat</div><div style="text-align:center">Verpackung</div><div style="text-align:center">Menge</div><div></div></div>`
     : `<div class="lager-header"><div>Zutat</div><div>Vendor</div><div style="text-align:center">Verpackung</div><div style="text-align:center">Menge</div><div style="text-align:center">Eisenmenge</div><div></div></div>`;
 
-  // Rows
-  document.getElementById('table-body').innerHTML = data.map((row, i) => {
+  // Rows — exclude archived
+  const activeData = data.map((row, i) => ({row, i})).filter(({row}) => !row.archived);
+  document.getElementById('table-body').innerHTML = activeData.map(({row, i}) => {
     const low = !isTruck && isLow(row);
     const lowBadge = low ? `<span class="low-badge">⚠ Nachbestellen</span>` : '';
     const ctxBtn = isBO ? `<button class="ctx-btn" onclick="openCtx(${i},this)">···</button>` : `<div></div>`;
@@ -596,6 +697,7 @@ function render() {
   }).join('');
 
   if (isBO) renderAddRow();
+  renderArchive();
 }
 
 document.addEventListener('click', e => {
