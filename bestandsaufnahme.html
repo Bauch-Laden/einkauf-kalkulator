@@ -123,6 +123,63 @@ header {
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A18; color: white; border-radius: 20px; padding: 10px 20px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 9999; white-space: nowrap; }
 .toast.show { opacity: 1; }
 
+/* Nachbestellen section */
+.nachbestellen-toggle {
+  display: none;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: var(--red-light);
+  border: 1.5px solid var(--red);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--red);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.nachbestellen-toggle.hidden { display: none !important; }
+.nachbestellen-section {
+  margin-top: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: none;
+}
+.nachbestellen-section.open { display: block; }
+.nb-shop-header {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  background: var(--red);
+  color: white;
+}
+.nb-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.nb-item:last-child { border-bottom: none; }
+.nb-item-name { color: var(--text); }
+.nb-item-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.nb-qty {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--red);
+  background: var(--red-light);
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
 /* Archive section */
 .archive-section { margin-top: 16px; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .archive-header {
@@ -154,7 +211,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.2</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.3</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -188,6 +245,13 @@ header {
   <div id="add-row-wrap" style="display:none">
     <div class="add-row" id="add-row-fields"></div>
   </div>
+
+  <!-- Nachbestellen section — visible in Lager tab when items are low -->
+  <button class="nachbestellen-toggle hidden" id="nb-toggle" onclick="toggleNachbestellen()">
+    <span id="nb-toggle-label">🛒 Nachbestellen-Liste anzeigen</span>
+    <span id="nb-chevron">▾</span>
+  </button>
+  <div class="nachbestellen-section" id="nb-section"></div>
 
   <!-- Archive section — only visible in BO mode -->
   <div class="archive-section" id="archive-section" style="display:none">
@@ -729,6 +793,7 @@ function render() {
 
   if (isBO) renderAddRow();
   renderArchive();
+  renderNachbestellen();
 }
 
 document.addEventListener('click', e => {
