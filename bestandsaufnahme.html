@@ -159,7 +159,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v3.0</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v3.1</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -324,6 +324,7 @@ let ctxIndex = null;
 let ctxName = null;
 let editIndex = null;
 let editVendors = [];
+let dataLoaded = false;
 
 // Build truck data from lager pack sizes
 function buildTruckData(names) {
@@ -359,6 +360,7 @@ async function loadBothTabs() {
   await loadTab('lager');
   await loadTab('truck');
   updateLastSync();
+  dataLoaded = true;
   render();
   showToast('✓ Daten geladen');
 }
@@ -406,6 +408,7 @@ async function initSheet(tab) {
 
 async function saveToSheets(silent = false) {
   if (!accessToken) { showToast('⚠️ Bitte zuerst anmelden'); return; }
+  if (!dataLoaded) { if (!silent) showToast('⚠️ Daten noch nicht geladen'); return; }
   const btn = document.getElementById('sync-btn');
   btn.disabled = true; btn.textContent = '⏳ Speichern...';
   try {
