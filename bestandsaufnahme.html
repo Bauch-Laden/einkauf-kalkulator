@@ -211,7 +211,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.3</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.4</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -398,7 +398,10 @@ function initGSI() {
     scope: SCOPES,
     login_hint: 'info@bauchladen.kitchen',
     callback: (resp) => {
-      if (resp.error) { showToast('❌ Anmeldung fehlgeschlagen'); return; }
+      if (resp.error || !resp.access_token) {
+        // Silent sign-in failed silently — user can still click button
+        return;
+      }
       accessToken = resp.access_token;
       document.getElementById('auth-banner').style.display = 'none';
       showToast('✓ Angemeldet');
@@ -406,12 +409,21 @@ function initGSI() {
     }
   });
 
-  // Try silent sign-in automatically on load
+  // Try silent sign-in on load — if it fails, user sees the banner and clicks manually
   try {
     tokenClient.requestAccessToken({ prompt: '' });
-  } catch(e) {}
+  } catch(e) {
+    // Silent sign-in not possible, banner stays visible
+  }
 }
-function signIn() { tokenClient.requestAccessToken({ prompt: '', login_hint: 'info@bauchladen.kitchen' }); }
+
+function signIn() {
+  try {
+    tokenClient.requestAccessToken({ prompt: 'select_account' });
+  } catch(e) {
+    showToast('❌ Login fehlgeschlagen — bitte Seite neu laden');
+  }
+}
 
 async function loadBothTabs() {
   showToast('⏳ Lade Daten...');
