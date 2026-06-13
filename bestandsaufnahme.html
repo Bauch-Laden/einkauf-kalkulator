@@ -154,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.8</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.9</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -316,6 +316,7 @@ let tokenClient = null;
 let accessToken = null;
 let isBO = false;
 let ctxIndex = null;
+let ctxName = null;
 let editIndex = null;
 let editVendors = [];
 
@@ -506,8 +507,8 @@ function addRow() {
   render();
 }
 
-function openCtx(i, btn) {
-  ctxIndex = i; closeCtx();
+function openCtx(i, name, btn) {
+  ctxIndex = i; ctxName = name; closeCtx();
   const rect = btn.getBoundingClientRect();
   const menu = document.getElementById('ctx-menu');
   menu.style.display = 'block';
@@ -518,17 +519,22 @@ function closeCtx() { document.getElementById('ctx-menu').style.display = 'none'
 
 function deleteRow() {
   closeCtx();
-  if (ctxIndex === null) return;
-  if (!confirm(`"${getData()[ctxIndex].name}" wirklich löschen?`)) return;
-  getData().splice(ctxIndex, 1);
-  ctxIndex = null; render();
+  if (ctxName === null) return;
+  const data = getData();
+  const idx = data.findIndex(r => r.name === ctxName);
+  if (idx < 0) return;
+  if (!confirm(`"${data[idx].name}" wirklich löschen?`)) return;
+  data.splice(idx, 1);
+  ctxIndex = null; ctxName = null; render();
 }
 
 function editRow() {
   closeCtx();
-  if (ctxIndex === null) return;
-  editIndex = ctxIndex;
-  const row = getData()[editIndex];
+  if (ctxName === null) return;
+  const data = getData();
+  editIndex = data.findIndex(r => r.name === ctxName);
+  if (editIndex < 0) return;
+  const row = data[editIndex];
   document.getElementById('edit-name').value = row.name || '';
   document.getElementById('edit-pack').value = row.pack || '';
 
@@ -572,22 +578,25 @@ function confirmEdit() {
 
 function archiveRow() {
   closeCtx();
-  if (ctxIndex === null) return;
+  if (ctxName === null) return;
   const data = getData();
-  const row = data[ctxIndex];
+  const row = data.find(r => r.name === ctxName);
+  if (!row) return;
   row.archived = true;
-  ctxIndex = null;
+  ctxName = null;
   render();
   saveToSheets();
   showToast(`📦 "${row.name}" archiviert`);
 }
 
-function restoreRow(tab, i) {
+function restoreRow(tab, name) {
   const data = tab === 'truck' ? truckData : lagerData;
-  data[i].archived = false;
+  const row = data.find(r => r.name === name);
+  if (!row) return;
+  row.archived = false;
   render();
   saveToSheets();
-  showToast(`✓ "${data[i].name}" reaktiviert`);
+  showToast(`✓ "${row.name}" reaktiviert`);
 }
 
 let archiveOpen = false;
@@ -619,7 +628,7 @@ function renderArchive() {
     const vendorTag = !isTruck && r.vendor ? `<span class="vendor-tag">${esc(r.vendor)}</span>` : '';
     const packVal = r.pack ? esc(r.pack) : '—';
     const nameCell = `<div class="item-name-cell"><span class="item-name-text" style="color:var(--text-muted)">${esc(r.name)}</span>${vendorTag}</div>`;
-    const restoreBtn = `<button class="restore-btn" onclick="restoreRow('${currentTab}',${i})">↩ Reaktivieren</button>`;
+    const restoreBtn = `<button class="restore-btn" onclick="restoreRow('${currentTab}','${r.name.replace(/'/g,"\\'")}')">↩ Reaktivieren</button>`;
 
     if (isTruck) {
       return `<div class="${rowClass} table-row archived-row">
@@ -685,7 +694,7 @@ function render() {
   document.getElementById('table-body').innerHTML = activeData.map(({row, i}) => {
     const low = !isTruck && isLow(row);
     const lowBadge = low ? `<span class="low-badge">⚠ Nachbestellen</span>` : '';
-    const ctxBtn = isBO ? `<button class="ctx-btn" onclick="openCtx(${i},this)">···</button>` : `<div></div>`;
+    const ctxBtn = isBO ? `<button class="ctx-btn" onclick="openCtx(${i},'${row.name.replace(/'/g,"\\'")}',this)">···</button>` : `<div></div>`;
 
     if (isTruck) {
       const packVal = row.pack ? `<div class="cell-val">${esc(row.pack)}</div>` : `<div class="cell-val" style="color:var(--text-subtle)">—</div>`;
