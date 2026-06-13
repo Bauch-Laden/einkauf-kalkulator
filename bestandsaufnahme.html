@@ -154,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.3</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.7</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -333,13 +333,22 @@ function initGSI() {
     callback: (resp) => {
       if (resp.error) { showToast('❌ Anmeldung fehlgeschlagen'); return; }
       accessToken = resp.access_token;
+      // Save hint for auto sign-in next time
+      try { localStorage.setItem('bl_signin_hint', 'true'); } catch(e) {}
       document.getElementById('auth-banner').style.display = 'none';
       showToast('✓ Angemeldet');
       loadBothTabs();
     }
   });
+
+  // Try silent sign-in on load if previously signed in
+  try {
+    if (localStorage.getItem('bl_signin_hint')) {
+      tokenClient.requestAccessToken({ prompt: '' });
+    }
+  } catch(e) {}
 }
-function signIn() { tokenClient.requestAccessToken(); }
+function signIn() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
 
 async function loadBothTabs() {
   showToast('⏳ Lade Daten...');
@@ -396,14 +405,21 @@ async function saveToSheets() {
   const btn = document.getElementById('sync-btn');
   btn.disabled = true; btn.textContent = '⏳ Speichern...';
   try {
-    const sheetName = currentTab === 'truck' ? 'Food-Truck' : 'Lager';
-    let values;
-    if (currentTab === 'truck') {
-      values = [['Zutat','Verpackung','Menge','Archiviert'], ...truckData.map(r=>[r.name,r.pack||'',r.menge||'',r.archived?'ja':''])];
-    } else {
-      values = [['Zutat','Vendor','Verpackung','Menge','Eisenmenge','Archiviert'], ...lagerData.map(r=>[r.name,r.vendor||'',r.pack||'',r.menge||'',r.eisen||'',r.archived?'ja':''])];
-    }
-    await writeSheet(sheetName, values);
+    // Always save BOTH tabs to keep archived flags in sync
+    const sortedTruck = [...truckData].sort((a,b) => a.name.localeCompare(b.name, 'de'));
+    const sortedLager = [...lagerData].sort((a,b) => a.name.localeCompare(b.name, 'de'));
+    const truckValues = [
+      ['Zutat','Verpackung','Menge','Archiviert'],
+      ...sortedTruck.map(r=>[r.name,r.pack||'',r.menge||'',r.archived?'ja':''])
+    ];
+    const lagerValues = [
+      ['Zutat','Vendor','Verpackung','Menge','Eisenmenge','Archiviert'],
+      ...sortedLager.map(r=>[r.name,r.vendor||'',r.pack||'',r.menge||'',r.eisen||'',r.archived?'ja':''])
+    ];
+    await Promise.all([
+      writeSheet('Food-Truck', truckValues),
+      writeSheet('Lager', lagerValues)
+    ]);
     showToast('✓ Gespeichert'); updateLastSync();
   } catch(e) { showToast('❌ Fehler beim Speichern'); }
   btn.disabled = false; btn.textContent = '💾 Speichern';
@@ -562,6 +578,7 @@ function archiveRow() {
   row.archived = true;
   ctxIndex = null;
   render();
+  saveToSheets();
   showToast(`📦 "${row.name}" archiviert`);
 }
 
@@ -569,6 +586,7 @@ function restoreRow(tab, i) {
   const data = tab === 'truck' ? truckData : lagerData;
   data[i].archived = false;
   render();
+  saveToSheets();
   showToast(`✓ "${data[i].name}" reaktiviert`);
 }
 
@@ -596,6 +614,7 @@ function renderArchive() {
   section.style.display = 'block';
 
   const rowClass = isTruck ? 'truck-row' : 'lager-row';
+  archived.sort((a, b) => a.r.name.localeCompare(b.r.name, 'de'));
   body.innerHTML = archived.map(({r, i}) => {
     const vendorTag = !isTruck && r.vendor ? `<span class="vendor-tag">${esc(r.vendor)}</span>` : '';
     const packVal = r.pack ? esc(r.pack) : '—';
@@ -659,8 +678,10 @@ function render() {
     ? `<div class="truck-header"><div>Zutat</div><div style="text-align:center">Verpackung</div><div style="text-align:center">Menge</div><div></div></div>`
     : `<div class="lager-header"><div>Zutat</div><div>Vendor</div><div style="text-align:center">Verpackung</div><div style="text-align:center">Menge</div><div style="text-align:center">Eisenmenge</div><div></div></div>`;
 
-  // Rows — exclude archived
-  const activeData = data.map((row, i) => ({row, i})).filter(({row}) => !row.archived);
+  // Rows — exclude archived, sort alphabetically
+  const activeData = data.map((row, i) => ({row, i}))
+    .filter(({row}) => !row.archived)
+    .sort((a, b) => a.row.name.localeCompare(b.row.name, 'de'));
   document.getElementById('table-body').innerHTML = activeData.map(({row, i}) => {
     const low = !isTruck && isLow(row);
     const lowBadge = low ? `<span class="low-badge">⚠ Nachbestellen</span>` : '';
