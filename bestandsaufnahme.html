@@ -154,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.9</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.0</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -363,7 +363,7 @@ async function loadBothTabs() {
 async function loadTab(tab) {
   try {
     const sheetName = tab === 'truck' ? 'Food-Truck' : 'Lager';
-    const cols = tab === 'truck' ? 'A2:C500' : 'A2:F500';
+    const cols = tab === 'truck' ? 'A2:D500' : 'A2:G500';
     const resp = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!${cols}`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
