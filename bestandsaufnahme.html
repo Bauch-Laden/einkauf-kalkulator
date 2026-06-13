@@ -211,7 +211,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.4</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.5</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -418,11 +418,12 @@ function initGSI() {
 }
 
 function signIn() {
-  try {
-    tokenClient.requestAccessToken({ prompt: 'select_account' });
-  } catch(e) {
-    showToast('❌ Login fehlgeschlagen — bitte Seite neu laden');
+  if (!tokenClient) {
+    showToast('⏳ Bitte kurz warten und nochmal klicken...');
+    setTimeout(signIn, 1500);
+    return;
   }
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
 }
 
 async function loadBothTabs() {
