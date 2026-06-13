@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bauch-Laden Bestandsaufnahme</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --orange: #FF9A00;
@@ -211,7 +212,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.5</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.6</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -418,11 +419,7 @@ function initGSI() {
 }
 
 function signIn() {
-  if (!tokenClient) {
-    showToast('⏳ Bitte kurz warten und nochmal klicken...');
-    setTimeout(signIn, 1500);
-    return;
-  }
+  if (!tokenClient) { showToast('⏳ Google lädt noch, bitte nochmal klicken...'); return; }
   tokenClient.requestAccessToken({ prompt: 'select_account' });
 }
 
@@ -833,10 +830,16 @@ function scheduleAutosave() {
 truckData = buildTruckData(TRUCK_NAMES);
 render();
 
-const gsi = document.createElement('script');
-gsi.src = 'https://accounts.google.com/gsi/client';
-gsi.onload = initGSI;
-document.head.appendChild(gsi);
+// GSI loaded via <head> script tag
+// Wait for google object to be available
+function waitForGSI() {
+  if (typeof google !== 'undefined' && google.accounts) {
+    initGSI();
+  } else {
+    setTimeout(waitForGSI, 100);
+  }
+}
+waitForGSI();
 </script>
 </body>
 </html>
