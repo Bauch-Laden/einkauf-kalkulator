@@ -212,7 +212,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.6</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.7</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -397,10 +397,9 @@ function initGSI() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    login_hint: 'info@bauchladen.kitchen',
     callback: (resp) => {
       if (resp.error || !resp.access_token) {
-        // Silent sign-in failed silently — user can still click button
+        showToast('❌ Anmeldung fehlgeschlagen');
         return;
       }
       accessToken = resp.access_token;
@@ -409,18 +408,11 @@ function initGSI() {
       loadBothTabs();
     }
   });
-
-  // Try silent sign-in on load — if it fails, user sees the banner and clicks manually
-  try {
-    tokenClient.requestAccessToken({ prompt: '' });
-  } catch(e) {
-    // Silent sign-in not possible, banner stays visible
-  }
 }
 
 function signIn() {
-  if (!tokenClient) { showToast('⏳ Google lädt noch, bitte nochmal klicken...'); return; }
-  tokenClient.requestAccessToken({ prompt: 'select_account' });
+  if (!tokenClient) { showToast('⏳ Seite bitte neu laden'); return; }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
 }
 
 async function loadBothTabs() {
