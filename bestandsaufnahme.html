@@ -154,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.0</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.1</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -330,26 +330,24 @@ function buildTruckData(names) {
 
 function initGSI() {
   tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID, scope: SCOPES,
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    login_hint: 'info@bauchladen.kitchen',
     callback: (resp) => {
       if (resp.error) { showToast('❌ Anmeldung fehlgeschlagen'); return; }
       accessToken = resp.access_token;
-      // Save hint for auto sign-in next time
-      try { localStorage.setItem('bl_signin_hint', 'true'); } catch(e) {}
       document.getElementById('auth-banner').style.display = 'none';
       showToast('✓ Angemeldet');
       loadBothTabs();
     }
   });
 
-  // Try silent sign-in on load if previously signed in
+  // Try silent sign-in automatically on load
   try {
-    if (localStorage.getItem('bl_signin_hint')) {
-      tokenClient.requestAccessToken({ prompt: '' });
-    }
+    tokenClient.requestAccessToken({ prompt: '' });
   } catch(e) {}
 }
-function signIn() { tokenClient.requestAccessToken({ prompt: 'select_account' }); }
+function signIn() { tokenClient.requestAccessToken({ prompt: '', login_hint: 'info@bauchladen.kitchen' }); }
 
 async function loadBothTabs() {
   showToast('⏳ Lade Daten...');
