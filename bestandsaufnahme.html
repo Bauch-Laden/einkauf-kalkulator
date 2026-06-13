@@ -154,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.1</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.2</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -399,7 +399,7 @@ async function initSheet(tab) {
   await writeSheet(sheetName, values);
 }
 
-async function saveToSheets() {
+async function saveToSheets(silent = false) {
   if (!accessToken) { showToast('⚠️ Bitte zuerst anmelden'); return; }
   const btn = document.getElementById('sync-btn');
   btn.disabled = true; btn.textContent = '⏳ Speichern...';
@@ -419,7 +419,9 @@ async function saveToSheets() {
       writeSheet('Food-Truck', truckValues),
       writeSheet('Lager', lagerValues)
     ]);
-    showToast('✓ Gespeichert'); updateLastSync();
+    if (!silent) showToast('✓ Gespeichert');
+    updateLastSync();
+    if (silent) document.getElementById('last-sync').textContent = `Automatisch gespeichert: ${new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`;
   } catch(e) { showToast('❌ Fehler beim Speichern'); }
   btn.disabled = false; btn.textContent = '💾 Speichern';
 }
@@ -598,6 +600,7 @@ function restoreRow(tab, name) {
 }
 
 let archiveOpen = false;
+let autosaveTimer = null;
 function toggleArchive() {
   archiveOpen = !archiveOpen;
   document.getElementById('archive-body').classList.toggle('open', archiveOpen);
@@ -699,16 +702,16 @@ function render() {
       return `<div class="truck-row table-row${low?' low':''}">
         <div class="item-name-cell"><span class="item-name-text">${esc(row.name)} ${lowBadge}</span></div>
         ${packVal}
-        <input class="cell-input menge" value="${esc(row.menge)}" placeholder="0" oninput="getData()[${i}].menge=this.value">
+        <input class="cell-input menge" value="${esc(row.menge)}" placeholder="0" oninput="getData()[${i}].menge=this.value;scheduleAutosave()">
         ${ctxBtn}
       </div>`;
     } else {
       const vendorTag = row.vendor ? `<span class="vendor-tag">${esc(row.vendor)}</span>` : '';
       const packDisplay = (isBO || !row.pack)
-        ? `<input class="cell-input" value="${esc(row.pack)}" placeholder="z.B. 750ml" oninput="getData()[${i}].pack=this.value">`
+        ? `<input class="cell-input" value="${esc(row.pack)}" placeholder="z.B. 750ml" oninput="getData()[${i}].pack=this.value;scheduleAutosave()">`
         : `<div class="cell-val">${esc(row.pack)}</div>`;
       const eisenDisplay = (isBO || !row.eisen)
-        ? `<input class="cell-input eisen" value="${esc(row.eisen)}" placeholder="min." oninput="getData()[${i}].eisen=this.value;render()">`
+        ? `<input class="cell-input eisen" value="${esc(row.eisen)}" placeholder="min." oninput="getData()[${i}].eisen=this.value;render();scheduleAutosave()">`
         : `<div class="cell-val" style="color:var(--red)">${esc(row.eisen)}</div>`;
       return `<div class="lager-row table-row${low?' low':''}">
         <div class="item-name-cell">
@@ -717,7 +720,7 @@ function render() {
         </div>
         <div style="font-size:12px;color:var(--text-muted);padding:4px">${esc(row.vendor||'—')}</div>
         ${packDisplay}
-        <input class="cell-input menge" value="${esc(row.menge)}" placeholder="0" oninput="getData()[${i}].menge=this.value">
+        <input class="cell-input menge" value="${esc(row.menge)}" placeholder="0" oninput="getData()[${i}].menge=this.value;scheduleAutosave()">
         ${eisenDisplay}
         ${ctxBtn}
       </div>`;
@@ -738,6 +741,14 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function scheduleAutosave() {
+  if (!accessToken) return;
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    saveToSheets(true); // silent = true (kein Toast)
+  }, 2000);
 }
 
 // Init
