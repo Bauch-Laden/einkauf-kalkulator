@@ -154,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.7</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v1.8</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -426,14 +426,14 @@ async function saveToSheets() {
 }
 
 async function writeSheet(sheetName, values) {
-  // First clear the entire sheet to remove stale rows
+  // First clear the entire sheet to remove stale rows (correct clear URL format)
   await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:F1000:clear`,
-    { method:'POST', headers:{ Authorization:`Bearer ${accessToken}` } }
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:G1000:clear`,
+    { method:'POST', headers:{ Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json' }, body:'{}' }
   );
-  // Then write fresh data
+  // Then write fresh data — use G to cover all 7 possible columns
   await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:F${values.length}?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}!A1:G${values.length}?valueInputOption=RAW`,
     { method:'PUT', headers:{ Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json' }, body:JSON.stringify({values}) }
   );
 }
