@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bauch-Laden Bestandsaufnahme</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --orange: #FF9A00;
@@ -124,63 +123,6 @@ header {
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1A1A18; color: white; border-radius: 20px; padding: 10px 20px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 9999; white-space: nowrap; }
 .toast.show { opacity: 1; }
 
-/* Nachbestellen section */
-.nachbestellen-toggle {
-  display: none;
-  width: 100%;
-  margin-top: 12px;
-  padding: 10px 16px;
-  background: var(--red-light);
-  border: 1.5px solid var(--red);
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--red);
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.nachbestellen-toggle.hidden { display: none !important; }
-.nachbestellen-section {
-  margin-top: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  display: none;
-}
-.nachbestellen-section.open { display: block; }
-.nb-shop-header {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 14px;
-  background: var(--red);
-  color: white;
-}
-.nb-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border-light);
-  font-size: 13px;
-}
-.nb-item:last-child { border-bottom: none; }
-.nb-item-name { color: var(--text); }
-.nb-item-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.nb-qty {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--red);
-  background: var(--red-light);
-  padding: 2px 8px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-
 /* Archive section */
 .archive-section { margin-top: 16px; border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .archive-header {
@@ -212,7 +154,7 @@ header {
 <header>
   <div class="logo">📦</div>
   <div class="header-text">
-    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.7</span></h1>
+    <h1>Bauch-Laden Bestandsaufnahme <span class="version">v2.2</span></h1>
     <p id="last-sync">Noch nicht synchronisiert</p>
   </div>
   <div class="header-right">
@@ -246,13 +188,6 @@ header {
   <div id="add-row-wrap" style="display:none">
     <div class="add-row" id="add-row-fields"></div>
   </div>
-
-  <!-- Nachbestellen section — visible in Lager tab when items are low -->
-  <button class="nachbestellen-toggle hidden" id="nb-toggle" onclick="toggleNachbestellen()">
-    <span id="nb-toggle-label">🛒 Nachbestellen-Liste anzeigen</span>
-    <span id="nb-chevron">▾</span>
-  </button>
-  <div class="nachbestellen-section" id="nb-section"></div>
 
   <!-- Archive section — only visible in BO mode -->
   <div class="archive-section" id="archive-section" style="display:none">
@@ -397,23 +332,22 @@ function initGSI() {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
+    login_hint: 'info@bauchladen.kitchen',
     callback: (resp) => {
-      if (resp.error || !resp.access_token) {
-        showToast('❌ Anmeldung fehlgeschlagen');
-        return;
-      }
+      if (resp.error) { showToast('❌ Anmeldung fehlgeschlagen'); return; }
       accessToken = resp.access_token;
       document.getElementById('auth-banner').style.display = 'none';
       showToast('✓ Angemeldet');
       loadBothTabs();
     }
   });
-}
 
-function signIn() {
-  if (!tokenClient) { showToast('⏳ Seite bitte neu laden'); return; }
-  tokenClient.requestAccessToken({ prompt: 'consent' });
+  // Try silent sign-in automatically on load
+  try {
+    tokenClient.requestAccessToken({ prompt: '' });
+  } catch(e) {}
 }
+function signIn() { tokenClient.requestAccessToken({ prompt: '', login_hint: 'info@bauchladen.kitchen' }); }
 
 async function loadBothTabs() {
   showToast('⏳ Lade Daten...');
@@ -795,7 +729,6 @@ function render() {
 
   if (isBO) renderAddRow();
   renderArchive();
-  renderNachbestellen();
 }
 
 document.addEventListener('click', e => {
@@ -822,16 +755,10 @@ function scheduleAutosave() {
 truckData = buildTruckData(TRUCK_NAMES);
 render();
 
-// GSI loaded via <head> script tag
-// Wait for google object to be available
-function waitForGSI() {
-  if (typeof google !== 'undefined' && google.accounts) {
-    initGSI();
-  } else {
-    setTimeout(waitForGSI, 100);
-  }
-}
-waitForGSI();
+const gsi = document.createElement('script');
+gsi.src = 'https://accounts.google.com/gsi/client';
+gsi.onload = initGSI;
+document.head.appendChild(gsi);
 </script>
 </body>
 </html>
