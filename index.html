@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0049)https://bauch-laden.github.io/einkauf-kalkulator/ -->
+<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bauch-Laden Portionskalkulator</title>
 <style>
@@ -298,10 +298,8 @@
   .chevron.open { transform: rotate(180deg); }
 
   .checklist-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 6px;
-    padding: 12px;
+    display: block;
+    padding: 0;
   }
 
   .checklist-items.collapsed {
@@ -311,20 +309,19 @@
   .check-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border-light);
     cursor: pointer;
-    font-size: 12.5px;
+    font-size: 13px;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.1s, border-color 0.1s;
-    background: var(--bg);
+    transition: background 0.1s;
+    background: var(--surface);
   }
+  .check-item:last-child { border-bottom: none; }
 
   .check-item.done {
-    background: var(--orange-light);
-    border-color: var(--orange);
+    background: var(--surface);
   }
 
   .check-item.done .check-item-text {
@@ -709,7 +706,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator & Einkaufsliste <span style="opacity:0.6;font-size:11px;">v2.7</span></p>
+    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v2.7</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -726,11 +723,11 @@
     <div style="font-size:22px;text-align:center;margin-bottom:8px;">🔒</div>
     <div style="font-size:15px;font-weight:600;text-align:center;margin-bottom:6px;">Backoffice-Zugang</div>
     <div style="font-size:12.5px;color:#7A7870;text-align:center;margin-bottom:18px;line-height:1.5;">Dieser Bereich ist nur für das Backoffice.<br>Bitte Passwort eingeben um fortzufahren.</div>
-    <input id="pw-input" type="password" placeholder="Passwort" style="width:100%;padding:10px 12px;border:1.5px solid #E8E6E0;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;" onkeydown="if(event.key==='Enter')checkPW()">
+    <input id="pw-input" type="password" placeholder="Passwort" style="width:100%;padding:10px 12px;border:1.5px solid #E8E6E0;border-radius:8px;font-size:14px;font-family:&#39;DM Sans&#39;,sans-serif;outline:none;margin-bottom:8px;" onkeydown="if(event.key===&#39;Enter&#39;)checkPW()">
     <div id="pw-error" style="display:none;font-size:12px;color:#c0392b;margin-bottom:8px;text-align:center;">Falsches Passwort. Bitte nochmal versuchen.</div>
     <div style="display:flex;gap:8px;margin-top:4px;">
-      <button onclick="closePWModal()" style="flex:1;padding:9px;border:1.5px solid #E8E6E0;border-radius:8px;background:none;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Abbrechen</button>
-      <button onclick="checkPW()" style="flex:1;padding:9px;border:none;border-radius:8px;background:#FF9A00;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Bestätigen</button>
+      <button onclick="closePWModal()" style="flex:1;padding:9px;border:1.5px solid #E8E6E0;border-radius:8px;background:none;font-size:13px;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;">Abbrechen</button>
+      <button onclick="checkPW()" style="flex:1;padding:9px;border:none;border-radius:8px;background:#FF9A00;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:&#39;DM Sans&#39;,sans-serif;">Bestätigen</button>
     </div>
   </div>
 </div>
@@ -738,38 +735,348 @@
 <div class="main">
 
   <div class="section-label">Gerichte auswählen</div>
-  <div class="dishes" id="dishes"></div>
+  <div class="dishes" id="dishes"><div class="dish-card selected"><div class="dish-name">Klassik Fladenbrot</div><div class="dish-base">Basis: 30 Port.</div><div class="portion-input-wrap">
+        <div class="portion-label">Portionen</div>
+        <div class="portion-controls">
+          <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion(&#39;Klassik Fladenbrot&#39;, -5)">−</button>
+          <input type="number" class="portion-num" id="pnum-Klassik_Fladenbrot" value="30" min="1" onclick="event.stopPropagation()" oninput="event.stopPropagation(); setPortion(&#39;Klassik Fladenbrot&#39;, this.value)">
+          <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion(&#39;Klassik Fladenbrot&#39;, 5)">+</button>
+        </div>
+      </div></div><div class="dish-card selected"><div class="dish-name">Oriental Fladenbrot</div><div class="dish-base">Basis: 30 Port.</div><div class="portion-input-wrap">
+        <div class="portion-label">Portionen</div>
+        <div class="portion-controls">
+          <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion(&#39;Oriental Fladenbrot&#39;, -5)">−</button>
+          <input type="number" class="portion-num" id="pnum-Oriental_Fladenbrot" value="30" min="1" onclick="event.stopPropagation()" oninput="event.stopPropagation(); setPortion(&#39;Oriental Fladenbrot&#39;, this.value)">
+          <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion(&#39;Oriental Fladenbrot&#39;, 5)">+</button>
+        </div>
+      </div></div><div class="dish-card selected"><div class="dish-name">Gözleme Kartoffel</div><div class="dish-base">Basis: 20 Port.</div><div class="portion-input-wrap">
+        <div class="portion-label">Portionen</div>
+        <div class="portion-controls">
+          <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion(&#39;Gözleme Kartoffel&#39;, -5)">−</button>
+          <input type="number" class="portion-num" id="pnum-Gözleme_Kartoffel" value="20" min="1" onclick="event.stopPropagation()" oninput="event.stopPropagation(); setPortion(&#39;Gözleme Kartoffel&#39;, this.value)">
+          <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion(&#39;Gözleme Kartoffel&#39;, 5)">+</button>
+        </div>
+      </div></div><div class="dish-card"><div class="dish-name">Gözleme Spinat-Käse</div><div class="dish-base">Basis: 20 Port.</div></div><div class="dish-card"><div class="dish-name">Çiğ Köfte</div><div class="dish-base">Basis: 35 Port.</div></div><div class="dish-card"><div class="dish-name">Hummus-Bowl</div><div class="dish-base">Basis: 20 Port.</div></div><div class="dish-card"><div class="dish-name">Linsensuppe</div><div class="dish-base">Basis: 30 Port.</div></div><div class="dish-card"><div class="dish-name">Salep</div><div class="dish-base">Basis: 20 Port.</div></div><div class="dish-card"><div class="dish-name">Kichererbsen-Eintopf</div><div class="dish-base">Basis: 30 Port.</div></div></div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('einkauf')" id="tab-einkauf">🛒 Einkaufsliste</button>
-    <button class="tab-btn" onclick="switchTab('gericht')" id="tab-gericht">🍽️ Gerichten-View</button>
+    <button class="tab-btn active" onclick="switchTab(&#39;einkauf&#39;)" id="tab-einkauf">🛒 Einkaufsliste</button>
+    <button class="tab-btn" onclick="switchTab(&#39;gericht&#39;)" id="tab-gericht">🍽️ Gerichten-View</button>
   </div>
 
   <!-- Tab: Einkaufsliste -->
   <div class="tab-panel active" id="panel-einkauf">
-    <div id="share-row" class="share-row" style="display:none">
+    <div id="share-row" class="share-row" style="display: flex;">
       <button class="share-btn" onclick="shareList()">🔗 Liste teilen</button>
       <button class="reset-btn" style="align-self:center;" onclick="resetBought()">Einkaufsliste zurücksetzen</button>
       <div class="share-toast" id="share-toast">✓ Link kopiert!</div>
     </div>
-    <div id="result">
-      <div class="empty-state">
-        <div class="empty-icon">🛒</div>
-        Gericht auswählen um die Einkaufsliste zu generieren
-      </div>
-    </div>
-    <div class="section-label" style="margin-top:1.5rem">Aus dem Lager mitnehmen</div>
-    <div class="checklist-wrap">
-      <div class="checklist-header" onclick="toggleChecklist()">
-        <div class="checklist-header-left">
-          <span class="checklist-title">Verbrauchsmaterial & Zubehör</span>
-          <span class="checklist-count" id="check-count">0 / 24</span>
+    <div id="result"><div class="shop-block"><div class="shop-name">Gaziantep</div><div class="shop-item">
+        <span class="shop-item-name">Fladenbrot</span>
+        <span class="shop-item-qty">16 Stück</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Gaziantep&#39;,&#39;Fladenbrot&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Gaziantep&#39;,&#39;Fladenbrot&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Gaziantep&#39;,&#39;Fladenbrot&#39;,&#39;16 Stück&#39;,&#39;Gaziantep&#39;)">🔀</button>
         </div>
-        <span class="chevron open" id="chevron">▾</span>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Gözleme (Kartoffel)</span>
+        <span class="shop-item-qty">20 Stück</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Gaziantep&#39;,&#39;Gözleme (Kartoffel)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Gaziantep&#39;,&#39;Gözleme (Kartoffel)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Gaziantep&#39;,&#39;Gözleme (Kartoffel)&#39;,&#39;20 Stück&#39;,&#39;Gaziantep&#39;)">🔀</button>
+        </div>
+      </div></div><div class="shop-block"><div class="shop-name">Türkischer Supermarkt (Hedef/Hakverdi)</div><div class="shop-item">
+        <span class="shop-item-name">Datteln</span>
+        <span class="shop-item-qty">750 g</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Türkischer Supermarkt (Hedef/Hakverdi)&#39;,&#39;Datteln&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Türkischer Supermarkt (Hedef/Hakverdi)&#39;,&#39;Datteln&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Türkischer Supermarkt (Hedef/Hakverdi)&#39;,&#39;Datteln&#39;,&#39;750 g&#39;,&#39;Türkischer Supermarkt (Hedef/Hakverdi)&#39;)">🔀</button>
+        </div>
+      </div></div><div class="shop-block"><div class="shop-name">Lidl</div><div class="shop-item">
+        <span class="shop-item-name">Olivenöl</span>
+        <span class="shop-item-qty">1.7 L</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Lidl&#39;,&#39;Olivenöl&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Lidl&#39;,&#39;Olivenöl&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Lidl&#39;,&#39;Olivenöl&#39;,&#39;1.7 L&#39;,&#39;Lidl&#39;)">🔀</button>
+        </div>
+      </div></div><div class="shop-block"><div class="shop-name">Mega</div><div class="shop-item">
+        <span class="shop-item-name">Rucola (gewaschen)</span>
+        <span class="shop-item-qty">300 g</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Rucola (gewaschen)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Rucola (gewaschen)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Rucola (gewaschen)&#39;,&#39;300 g&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Mozzarella (Schnitt)</span>
+        <span class="shop-item-qty">1 kg</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Mozzarella (Schnitt)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Mozzarella (Schnitt)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Mozzarella (Schnitt)&#39;,&#39;1 kg&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Gouda Käse (Schnitt)</span>
+        <span class="shop-item-qty">2 kg</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Gouda Käse (Schnitt)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Gouda Käse (Schnitt)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Gouda Käse (Schnitt)&#39;,&#39;2 kg&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Mega Mix (gemischter Salat)</span>
+        <span class="shop-item-qty">5.1 kg</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Mega Mix (gemischter Salat)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Mega Mix (gemischter Salat)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Mega Mix (gemischter Salat)&#39;,&#39;5.1 kg&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Balsamico</span>
+        <span class="shop-item-qty">5 Fl.</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Balsamico&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Balsamico&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Balsamico&#39;,&#39;5 Fl.&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Ajvar</span>
+        <span class="shop-item-qty">3 kg</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Ajvar&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Ajvar&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Ajvar&#39;,&#39;3 kg&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Gewürze (Oregano, Thymian, Pfeffer)</span>
+        <span class="shop-item-qty">2 Pck.</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Mega&#39;,&#39;Gewürze (Oregano, Thymian, Pfeffer)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Mega&#39;,&#39;Gewürze (Oregano, Thymian, Pfeffer)&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Mega&#39;,&#39;Gewürze (Oregano, Thymian, Pfeffer)&#39;,&#39;2 Pck.&#39;,&#39;Mega&#39;)">🔀</button>
+        </div>
+      </div></div><div class="shop-block"><div class="shop-name">Selgros</div><div class="shop-item">
+        <span class="shop-item-name">Kalamata Oliven</span>
+        <span class="shop-item-qty">1.5 kg</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Selgros&#39;,&#39;Kalamata Oliven&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Selgros&#39;,&#39;Kalamata Oliven&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Selgros&#39;,&#39;Kalamata Oliven&#39;,&#39;1.5 kg&#39;,&#39;Selgros&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Getrocknete Tomaten</span>
+        <span class="shop-item-qty">1 Pck.</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Selgros&#39;,&#39;Getrocknete Tomaten&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Selgros&#39;,&#39;Getrocknete Tomaten&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Selgros&#39;,&#39;Getrocknete Tomaten&#39;,&#39;1 Pck.&#39;,&#39;Selgros&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Feigenmarmelade</span>
+        <span class="shop-item-qty">4 Glas</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Selgros&#39;,&#39;Feigenmarmelade&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Selgros&#39;,&#39;Feigenmarmelade&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Selgros&#39;,&#39;Feigenmarmelade&#39;,&#39;4 Glas&#39;,&#39;Selgros&#39;)">🔀</button>
+        </div>
+      </div><div class="shop-item">
+        <span class="shop-item-name">Ziegenkäse</span>
+        <span class="shop-item-qty">2 kg</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem(&#39;Selgros&#39;,&#39;Ziegenkäse&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem(&#39;Selgros&#39;,&#39;Ziegenkäse&#39;)">
+            <div class="item-check-box">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+          <button class="redirect-btn" onclick="openRedirectModal(&#39;Selgros&#39;,&#39;Ziegenkäse&#39;,&#39;2 kg&#39;,&#39;Selgros&#39;)">🔀</button>
+        </div>
+      </div></div></div>
+    <div class="section-label" style="margin-top:1.5rem">Aus dem Lager mitnehmen</div>
+    <div class="shop-block">
+      <div class="shop-name" onclick="toggleChecklist()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span>Lager</span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span id="check-count" style="font-size:11px;background:rgba(255,255,255,0.25);border-radius:20px;padding:1px 8px">0 / 29</span>
+          <span id="chevron">▾</span>
+        </span>
       </div>
-      <div id="checklist-items" class="checklist-items"></div>
-      <div class="reset-row">
-        <button class="reset-btn" onclick="resetChecks()">Verbrauchsmaterial & Zubehör zurücksetzen</button>
+      <div id="checklist-items" class="checklist-items" style="display:block"><div class="check-item" onclick="toggleCheckKey(&#39;d_teller_laenglich&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Pleta Teller Länglich (Swawi) ODER Pappteller Länglich — Mega<span class="dyn-count">80 Stück</span></span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;d_teller_bowl&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Pleta Teller Bowl (Indra) ODER Pappteller Bowl — Mega<span class="dyn-count dyn-count--empty">—</span></span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;d_gabeln&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Gabeln (Birkenholz)<span class="dyn-count">80 Stück</span></span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;d_loeffel&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Löffel (Birkenholz)<span class="dyn-count dyn-count--empty">—</span></span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;d_servietten&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Servietten<span class="dyn-count">240 Stück</span></span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_0&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Kleingeld-Münzen (2 € / 1 €)</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_1&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Handschuhe Größe M</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_2&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Handschuhe Größe L</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_3&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Baumwollhandschuhe</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_4&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Thermomix</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_5&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Wärmebehälter</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_6&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Balsamico</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_7&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Majoran</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_8&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Oregano</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_9&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Tork-Handtücher</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_10&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Desinfektionsmittel</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_11&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Mülltüte 35 Lt</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_21&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Mülltüte 60 Lt</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_22&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Mülltüte 120 Lt</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_12&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Tabasco</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_13&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Pappbecher Glühwein — Internet</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_14&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Pappbecher Suppe — Internet</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_15&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Pappbecher Mokka — Internet</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_16&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Pappbecher Probe — Internet</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_17&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Frische Basilikum (2×) — Lidl</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_18&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Backpapier 100m Profi — Selgros</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_19&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Schürze</span>
+    </div><div class="check-item" onclick="toggleCheckKey(&#39;s_20&#39;)">
+      <div class="checkbox"><span class="checkmark">✓</span></div>
+      <span class="check-item-text">Küchentücher</span>
+    </div></div>
+      <div style="padding:10px 14px;border-top:1px solid var(--border-light)">
+        <button class="reset-btn" onclick="resetChecks()">Verbrauchsmaterial &amp; Zubehör zurücksetzen</button>
       </div>
     </div>
   </div>
@@ -857,7 +1164,7 @@ const STATIC_ITEMS = [
   "Kleingeld-Münzen (2 € / 1 €)", "Handschuhe Größe M", "Handschuhe Größe L",
   "Baumwollhandschuhe", "Thermomix", "Wärmebehälter",
   "Balsamico", "Majoran", "Oregano", "Tork-Handtücher", "Desinfektionsmittel",
-  "Müllbeutel (35 l)", "Tabasco",
+  "Mülltüte 35 Lt", "Mülltüte 60 Lt", "Mülltüte 120 Lt", "Tabasco",
   "Pappbecher Glühwein — Internet", "Pappbecher Suppe — Internet",
   "Pappbecher Mokka — Internet", "Pappbecher Probe — Internet",
   "Frische Basilikum (2×) — Lidl", "Backpapier 100m Profi — Selgros",
@@ -946,6 +1253,7 @@ function setPortion(name, val) {
   renderResult();
 }
 
+let doneItems = [];
 function renderResult() {
   const res = document.getElementById('result');
   const active = dishNames.filter(n => selections[n].active && selections[n].portions > 0);
@@ -978,21 +1286,29 @@ function renderResult() {
   });
 
   let html = '';
+  doneItems = [];
   const shopOrder = ["Gaziantep","Türkischer Supermarkt (Hedef/Hakverdi)","Hakverdi","Lidl","Mega","Selgros","DM","Türkischer Markt"];
   const allShops = [...new Set([...shopOrder, ...Object.keys(combined)])].filter(s => combined[s]);
+
   allShops.forEach(shop => {
+    const allShopItems = Object.values(combined[shop]);
+    const pendingItems = allShopItems.filter(({item}) => !(lagerItems.has(shop+'|'+item) && truckItems.has(shop+'|'+item)));
+    const completedItems = allShopItems.filter(({item}) => lagerItems.has(shop+'|'+item) && truckItems.has(shop+'|'+item));
+    completedItems.forEach(entry => doneItems.push({...entry, shop}));
+
+    if (pendingItems.length === 0) return;
+
     html += `<div class="shop-block"><div class="shop-name">${shop}</div>`;
-    Object.values(combined[shop]).forEach(({item, qty, unit, originalShop}) => {
+    pendingItems.forEach(({item, qty, unit, originalShop}) => {
       const bkey = shop + '|' + item;
       const isLager = lagerItems.has(bkey);
       const isTruck = truckItems.has(bkey);
       const statusClass = isTruck ? ' status-truck' : (isLager ? ' status-lager' : '');
-      const safeShop = shop.replace(/'/g, "\\'");
-      const safeItem = item.replace(/'/g, "\\'");
+      const safeShop = shop.replace(/'/g, "\'");
+      const safeItem = item.replace(/'/g, "\'");
       const origShop = originalShop || shop;
       const redirectKey = origShop + '|' + item;
       const redirectedTo = itemRedirects[redirectKey];
-      const isRedirected = redirectedTo && redirectedTo !== shop;
       const redirectBadge = (redirectedTo && redirectedTo === shop) ? `<span class="redirect-badge">verschoben von ${origShop}</span>` : '';
       const safeOrigShop = origShop.replace(/'/g, "\'");
       html += `<div class="shop-item${statusClass}">
@@ -1007,7 +1323,7 @@ function renderResult() {
             <div class="item-check-box${isTruck?' checked-truck':''}">✓</div>
             <span class="item-check-label">Im Truck</span>
           </div>
-          <button class="redirect-btn" onclick="openRedirectModal('${safeOrigShop}','${safeItem}','${fmt(qty,unit).replace(/'/g,"\\'")}','${safeShop}')">🔀</button>
+          <button class="redirect-btn" onclick="openRedirectModal('${safeOrigShop}','${safeItem}','${fmt(qty,unit).replace(/'/g,"\'")}','${safeShop}')">🔀</button>
         </div>
       </div>`;
     });
@@ -1214,33 +1530,106 @@ function renderChecklist() {
   const container = document.getElementById('checklist-items');
   const dynamic = getDynamicItems();
   const total = STATIC_ITEMS.length + dynamic.length;
+  const VS = 'Verbrauchsmaterial';
   let html = '';
+  const doneAll = [];
 
-  // Dynamic calculated items first
+  function itemRow(name, isLager, isTruck, extraLabel, redirect, qty) {
+    const currentShop = redirect || VS;
+    const redirectBadge = redirect ? `<span class="redirect-badge">verschoben von Lager</span>` : '';
+    const safeName = name.replace(/'/g, "\\'");
+    const safeQty = (qty||'—').replace(/'/g, "\\'");
+    return `<div class="shop-item">
+      <div class="shop-item-name">${name}${extraLabel||''}${redirectBadge}</div>
+      <div class="item-checks">
+        <div class="item-check-wrap${isLager?' checked':''}" onclick="toggleLagerItem('${VS}','${safeName}')">
+          <div class="item-check-box${isLager?' checked-lager':''}">✓</div>
+          <span class="item-check-label">Bestellt/<br>Im Lager</span>
+        </div>
+        <div class="item-check-wrap${isTruck?' checked':''}" onclick="toggleTruckItem('${VS}','${safeName}')">
+          <div class="item-check-box${isTruck?' checked-truck':''}">✓</div>
+          <span class="item-check-label">Im Truck</span>
+        </div>
+        <button class="redirect-btn" onclick="openRedirectModal('${VS}','${safeName}','${safeQty}','${currentShop}')">🔀</button>
+      </div>
+    </div>`;
+  }
+
+  function doneRow(name, extraLabel) {
+    const safeName = name.replace(/'/g, "\\'");
+    return `<div class="shop-item" style="opacity:0.6;text-decoration:line-through;color:var(--text-muted)">
+      <div class="shop-item-name">${name}${extraLabel||''}</div>
+      <div class="item-checks">
+        <div class="item-check-wrap" onclick="toggleLagerItem('${VS}','${safeName}')">
+          <div class="item-check-box checked-lager">✓</div>
+          <span class="item-check-label">Bestellt/<br>Im Lager</span>
+        </div>
+        <div class="item-check-wrap" onclick="toggleTruckItem('${VS}','${safeName}')">
+          <div class="item-check-box checked-truck">✓</div>
+          <span class="item-check-label">Im Truck</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Dynamic items
   dynamic.forEach(({key, label, count}) => {
-    const done = checked.has('d_' + key);
+    const isLager = lagerItems.has(VS+'|'+label);
+    const isTruck = truckItems.has(VS+'|'+label);
     const countLabel = count > 0
       ? `<span class="dyn-count">${count} Stück</span>`
       : `<span class="dyn-count dyn-count--empty">—</span>`;
-    html += `<div class="check-item${done?' done':''}" onclick="toggleCheckKey('d_${key}')">
-      <div class="checkbox"><span class="checkmark">✓</span></div>
-      <span class="check-item-text">${label}${countLabel}</span>
-    </div>`;
+    if (isLager && isTruck) {
+      doneAll.push({ name: label, extra: count > 0 ? ` (${count} Stück)` : '' });
+      return;
+    }
+    const redirect = itemRedirects[VS+'|'+label];
+    const qtyStr = count > 0 ? count + ' Stück' : '—';
+    html += itemRow(label, isLager, isTruck, countLabel, redirect, qtyStr);
   });
 
   // Static items
-  STATIC_ITEMS.forEach((item, i) => {
-    const done = checked.has('s_' + i);
-    html += `<div class="check-item${done?' done':''}" onclick="toggleCheckKey('s_${i}')">
-      <div class="checkbox"><span class="checkmark">✓</span></div>
-      <span class="check-item-text">${item}</span>
-    </div>`;
+  STATIC_ITEMS.forEach((item) => {
+    const isLager = lagerItems.has(VS+'|'+item);
+    const isTruck = truckItems.has(VS+'|'+item);
+    if (isLager && isTruck) {
+      doneAll.push({ name: item, extra: '' });
+      return;
+    }
+    const redirect = itemRedirects[VS+'|'+item];
+    html += itemRow(item, isLager, isTruck, '', redirect, '—');
   });
 
-  container.innerHTML = html;
-  document.getElementById('check-count').textContent = `${checked.size} / ${total}`;
-}
+  // All done items — Vendor + Verbrauchsmaterial together at the very bottom
+  const totalDone = doneItems.length + doneAll.length;
+  if (totalDone > 0) {
+    html += `<div style="background:#4caf50;color:white;font-size:13px;font-weight:600;padding:8px 14px;margin-top:4px">✅ Bereits erledigt (${totalDone})</div>`;
+    // Vendor items
+    doneItems.forEach(({item, qty, unit, shop}) => {
+      const safeShop = shop.replace(/'/g, "\'");
+      const safeItem = item.replace(/'/g, "\'");
+      html += `<div class="shop-item" style="opacity:0.6;text-decoration:line-through;color:var(--text-muted)">
+        <span class="shop-item-name">${item} <span style="font-size:11px;color:var(--text-subtle)">(${shop})</span></span>
+        <span class="shop-item-qty">${fmt(qty, unit)}</span>
+        <div class="item-checks">
+          <div class="item-check-wrap" onclick="toggleLagerItem('${safeShop}','${safeItem}')">
+            <div class="item-check-box checked-lager">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap" onclick="toggleTruckItem('${safeShop}','${safeItem}')">
+            <div class="item-check-box checked-truck">✓</div>
+            <span class="item-check-label">Im Truck</span>
+          </div>
+        </div>
+      </div>`;
+    });
+    // Verbrauchsmaterial items
+    doneAll.forEach(({name, extra}) => { html += doneRow(name, extra); });
+  }
 
+  container.innerHTML = html;
+  document.getElementById('check-count').textContent = `${doneAll.length} / ${total}`;
+}
 function toggleCheckKey(key) {
   if (checked.has(key)) checked.delete(key); else checked.add(key);
   renderChecklist();
@@ -1309,5 +1698,6 @@ renderDishes();
 renderResult();
 renderChecklist();
 </script>
-</body>
-</html>
+
+
+</body></html>
