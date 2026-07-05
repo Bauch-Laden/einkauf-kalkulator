@@ -698,6 +698,36 @@
     line-height: 1;
   }
   .lager-item.checked .check-mark { display: block; }
+
+  .masse-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .masse-toggle-btn {
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1.5px solid var(--orange);
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .masse-opt {
+    padding: 3px 10px;
+    cursor: pointer;
+    background: white;
+    color: var(--orange);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .masse-opt.active {
+    background: var(--orange);
+    color: white;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -706,7 +736,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v2.7</span></p>
+    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v3.3</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -1107,13 +1137,13 @@
 const BASE = {
   "Klassik Fladenbrot": { base: 30, shops: {
     "Gaziantep": [["Fladenbrot", 8, "Stück"]],
-    "Lidl": [["Olivenöl", 833, "ml"]],
+    "Lidl": [["Olivenöl", 666, "g"]],
     "Selgros": [["Kalamata Oliven", 750, "g"], ["Getrocknete Tomaten", 1, "Pck."]],
     "Mega": [["Rucola (gewaschen)", 250, "g"], ["Mozzarella (Schnitt)", 1000, "g"], ["Gouda Käse (Schnitt)", 2000, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."], ["Ajvar", 1500, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]]
   }},
   "Oriental Fladenbrot": { base: 30, shops: {
     "Gaziantep": [["Fladenbrot", 8, "Stück"]],
-    "Lidl": [["Olivenöl", 833, "ml"]],
+    "Lidl": [["Olivenöl", 666, "g"]],
     "Türkischer Supermarkt (Hedef/Hakverdi)": [["Datteln", 750, "g"]],
     "Selgros": [["Feigenmarmelade", 4, "Glas"], ["Ziegenkäse", 2000, "g"]],
     "Mega": [["Rucola (gewaschen)", 50, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]]
@@ -1130,18 +1160,18 @@ const BASE = {
   }},
   "Çiğ Köfte": { base: 35, shops: {
     "Türkischer Supermarkt (Hedef/Hakverdi)": [["Arabisches Fladenbrot", 35, "Stück"], ["Bulgur (sehr fein)", 1800, "g"], ["Paprikamark", 400, "g"], ["Granatapfelsirup", 200, "g"], ["Sumach", 10, "TL"]],
-    "Mega": [["Zwiebeln", 1200, "g"], ["Eisbergsalat", 5, "Kopf/Köpfe"], ["Minze", 2, "Bund"], ["Petersilie (geschnitten)", 2, "Bund"], ["Tortilla Chips Natur", 500, "g"], ["Salz", 8, "TL"], ["Kreuzkümmel", 8, "TL"], ["Pfeffer", 2, "TL"], ["Paprikapulver (süß)", 9, "TL"]],
+    "Mega": [["Zwiebeln", 1200, "g"], ["Minze", 2, "Bund"], ["Petersilie (geschnitten)", 2, "Bund"], ["Tortilla Chips Natur", 500, "g"], ["Salz", 8, "TL"], ["Kreuzkümmel", 8, "TL"], ["Pfeffer", 2, "TL"], ["Paprikapulver (süß)", 9, "TL"]],
     "Lidl": [["Knoblauchzehen", 16, "Stück"]],
-    "Lidl": [["Tomaten", 1000, "g"], ["Gurken", 5, "Stück"], ["Olivenöl", 667, "ml"], ["Zitronensaft", 50, "g"], ["Rohrzucker", 32, "g"], ["Wasser", 1500, "ml"], ["Tomatenmark", 250, "g"]]
+    "Lidl": [["Tomaten", 1000, "g"], ["Gurken", 5, "Stück"], ["Olivenöl", 534, "g"], ["Zitronensaft", 50, "ml"], ["Rohrzucker", 32, "g"], ["Wasser", 1500, "ml"], ["Tomatenmark", 250, "g"]]
   }},
   "Hummus-Bowl": { base: 20, shops: {
     "Gaziantep": [["Fladenbrot", 3, "Stück"]],
-    "Lidl": [["Duftreis", 1000, "g"], ["Cherry-Tomaten", 15, "Stück"], ["Olivenöl", 89, "ml"], ["Zitronensaft", 45, "g"], ["Wasser", 1000, "ml"], ["Knoblauchzehen", 2, "Stück"]],
+    "Lidl": [["Duftreis", 1000, "g"], ["Cherry-Tomaten", 15, "Stück"], ["Olivenöl", 200, "g"], ["Zitronensaft", 45, "ml"], ["Wasser", 1000, "ml"], ["Knoblauchzehen", 2, "Stück"]],
     "Selgros": [["Mais (abgetropft)", 570, "g"], ["Kichererbsen — Bowl", 1600, "g"], ["Rotkohlsalat", 750, "g"], ["Zaziki", 750, "g"], ["Tahin", 100, "g"], ["Kichererbsen — Hummus", 750, "g"], ["Kichererbsensaft", 200, "g"], ["Eingelegte Mini-Gurken", 15, "Stück"], ["Geschnittene Gurke / Maiskölbchen", 500, "g"], ],
     "Mega": [["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 1, "Fl."], ["Petersilie (geschnitten)", 0.5, "Bund"], ["Ajvar", 750, "g"], ["Salz", 2.2, "TL"], ["Kreuzkümmel", 1, "TL"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."], ["Cayennepfeffer", 0.1, "g"], ["Gewürzmischung (Cumin, Cayenne, Salz)", 1, "Pck."]]
   }},
   "Linsensuppe": { base: 30, shops: {
-    "Lidl": [["Olivenöl", 89, "ml"], ["Zwiebeln", 300, "g"], ["Kartoffeln", 400, "g"], ["Tomatenmark", 200, "g"], ["Zitronen", 2, "Stück"]],
+    "Lidl": [["Olivenöl", 71, "g"], ["Zwiebeln", 300, "g"], ["Kartoffeln", 400, "g"], ["Tomatenmark", 200, "g"], ["Zitronen", 2, "Stück"]],
     "Mega": [["Karotten (gerieben)", 300, "g"]],
     "DM": [["Rote Linsen", 750, "g"], ["Gemüsebrühe", 40, "g"]],
     "Türkischer Supermarkt (Hedef/Hakverdi)": [["Arabisches Fladenbrot", 30, "Stück"]]
@@ -1153,7 +1183,7 @@ const BASE = {
   }},
   "Kichererbsen-Eintopf": { base: 30, shops: {
     "Selgros": [["Kichererbsen (Dose)", 2, "Dose(n)"], ["Zaziki", 1500, "g"]],
-    "Lidl": [["Tomaten (Dose)", 2, "Dose(n)"], ["Tomatenmark", 200, "g"], ["Zwiebeln", 400, "g"], ["Kartoffeln", 500, "g"], ["Olivenöl", 200, "ml"], ["Duftreis", 3000, "g"], ["Wasser", 4500, "ml"], ["Wasser", 3000, "ml"]],
+    "Lidl": [["Tomaten (Dose)", 2, "Dose(n)"], ["Tomatenmark", 200, "g"], ["Zwiebeln", 400, "g"], ["Kartoffeln", 500, "g"], ["Olivenöl", 160, "g"], ["Duftreis", 3000, "g"], ["Wasser", 4500, "ml"], ["Wasser", 3000, "ml"]],
     "Mega": [["Karottenwürfel", 750, "g"], ["Oregano", 2, "EL"], ["Petersilie (geschnitten)", 0.5, "Bund"]],
     "DM": [["Gemüsebrühe", 100, "g"]]
   }}
@@ -1177,6 +1207,14 @@ const selections = {};
 dishNames.forEach(d => { selections[d] = { active: false, portions: BASE[d].base }; });
 const checked = new Set();
 const lagerItems = new Set();
+let cigKofteMasseSelbst = true; // true = selbst zubereiten, false = fertig kaufen
+
+// Alternatives Çiğ Köfte Rezept wenn Masse fertig gekauft wird (Basis: 35 Portionen)
+const CIG_KOFTE_KAUFEN_SHOPS = {
+  "Türkischer Supermarkt (Hedef/Hakverdi)": [["Arabisches Fladenbrot", 35, "Stück"], ["Granatapfelsirup", 500, "ml"]],
+  "Mega": [["Zwiebeln", 500, "g"], ["Minze", 2, "Bund"], ["Petersilie (geschnitten)", 1, "Bund"], ["Tortilla Chips Natur", 500, "g"]],
+  "Lidl": [["Tomaten", 1000, "g"], ["Gurken", 5, "Stück"], ["Olivenöl", 80, "g"], ["Zitronensaft", 50, "ml"], ["Wasser", 400, "ml"]]
+};
 const truckItems = new Set();
 let checklistOpen = true;
 
@@ -1225,6 +1263,7 @@ function renderDishes() {
           <button class="portion-btn" onclick="event.stopPropagation(); adjustPortion('${name}', 5)">+</button>
         </div>
       </div>`;
+
     }
     card.innerHTML = inner;
     card.addEventListener('click', () => {
@@ -1233,6 +1272,26 @@ function renderDishes() {
       renderResult();
     });
     container.appendChild(card);
+
+    // After Çiğ Köfte card, insert toggle card if active
+    if (name === 'Çiğ Köfte' && sel.active) {
+      const toggleCard = document.createElement('div');
+      toggleCard.className = 'dish-card selected';
+      toggleCard.style.cursor = 'default';
+      toggleCard.innerHTML = `
+        <div class="dish-name" style="font-size:13px">Çiğ Köfte Masse</div>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px" onclick="event.stopPropagation()">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;${cigKofteMasseSelbst?'font-weight:600;color:var(--orange)':'color:var(--text-muted)'}" onclick="event.stopPropagation();setMasse(true)">
+            <span style="width:16px;height:16px;border-radius:50%;border:2px solid ${cigKofteMasseSelbst?'var(--orange)':'var(--border)'};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${cigKofteMasseSelbst?'<span style=\'width:8px;height:8px;border-radius:50%;background:var(--orange)\'></span>':''}</span>
+            🥣 Selbst zubereiten
+          </label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;${!cigKofteMasseSelbst?'font-weight:600;color:var(--orange)':'color:var(--text-muted)'}" onclick="event.stopPropagation();setMasse(false)">
+            <span style="width:16px;height:16px;border-radius:50%;border:2px solid ${!cigKofteMasseSelbst?'var(--orange)':'var(--border)'};display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${!cigKofteMasseSelbst?'<span style=\'width:8px;height:8px;border-radius:50%;background:var(--orange)\'></span>':''}</span>
+            📦 Fertig kaufen
+          </label>
+        </div>`;
+      container.appendChild(toggleCard);
+    }
   });
 }
 
@@ -1271,7 +1330,10 @@ function renderResult() {
   const combined = {};
   active.forEach(name => {
     const factor = selections[name].portions / BASE[name].base;
-    Object.entries(BASE[name].shops).forEach(([shop, items]) => {
+    const effectiveShops = (name === "Çiğ Köfte" && !cigKofteMasseSelbst)
+      ? CIG_KOFTE_KAUFEN_SHOPS
+      : BASE[name].shops;
+    Object.entries(effectiveShops).forEach(([shop, items]) => {
       items.forEach(([item, qty, unit]) => {
         // Check if redirected to another shop
         const redirectKey = shop + '|' + item;
@@ -1283,6 +1345,21 @@ function renderResult() {
         combined[effectiveShop][key].qty += qty * factor;
       });
     });
+  });
+
+  // Inject redirected Lager/Verbrauchsmaterial items into target vendor
+  const VS = 'Verbrauchsmaterial';
+  const allLagerItems = [...getDynamicItems().map(d => d.label), ...STATIC_ITEMS];
+  allLagerItems.forEach(item => {
+    const redirectKey = VS + '|' + item;
+    const targetShop = itemRedirects[redirectKey];
+    if (targetShop && targetShop !== VS) {
+      if (!combined[targetShop]) combined[targetShop] = {};
+      const key = item + '|lager';
+      if (!combined[targetShop][key]) {
+        combined[targetShop][key] = { item, qty: 0, unit: '', originalShop: VS };
+      }
+    }
   });
 
   let html = '';
@@ -1332,13 +1409,26 @@ function renderResult() {
 
   if (active.includes("Çiğ Köfte")) {
     const p = selections["Çiğ Köfte"].portions;
-    const rounds = Math.ceil(p / 35 * 4);
-    html += `<div class="thermomix-hint">🌀 Çiğ Köfte: ca. <strong>${rounds} Thermomix-Runde(n)</strong> für ${p} Portionen (à 450 g Bulgur)</div>`;
+    const factor = p / 35;
+    const rounds = Math.ceil(factor * 4);
+    let hintHtml;
+    if (cigKofteMasseSelbst) {
+      hintHtml = `<div class="thermomix-hint">🌀 Çiğ Köfte: ca. <strong>${rounds} Thermomix-Runde(n)</strong> für ${p} Portionen (à 450 g Bulgur)</div>`;
+    } else {
+      hintHtml = `<div class="thermomix-hint">📦 <strong>${(5*factor).toFixed(1)} kg</strong> Çiğ Köfte Masse mit <strong>${Math.round(400*factor)} ml</strong> heißem Wasser, <strong>${Math.round(80*factor)} g</strong> Olivenöl und <strong>${Math.round(100*factor)} ml</strong> Granatapfelsirup mischen und kneten.</div>`;
+    }
+    html = hintHtml + html; // Hint ganz oben, immer sichtbar
   }
 
   res.innerHTML = html;
   renderChecklist();
   if (document.getElementById('panel-gericht').classList.contains('active')) renderGerichtView();
+}
+
+function setMasse(selbst) {
+  cigKofteMasseSelbst = selbst;
+  renderDishes();
+  renderResult();
 }
 
 function toggleLagerItem(shop, item) {
@@ -1529,6 +1619,7 @@ function loadFromURL() {
 function renderChecklist() {
   const container = document.getElementById('checklist-items');
   const dynamic = getDynamicItems();
+  const active = dishNames.filter(n => selections[n].active && selections[n].portions > 0);
   const total = STATIC_ITEMS.length + dynamic.length;
   const VS = 'Verbrauchsmaterial';
   let html = '';
@@ -1572,6 +1663,25 @@ function renderChecklist() {
     </div>`;
   }
 
+  // Çiğ Köfte Masse (fertig kaufen) — show at top of Lager section
+  if (active && active.includes && active.includes("Çiğ Köfte") && !cigKofteMasseSelbst) {
+    const factor = selections["Çiğ Köfte"].portions / 35;
+    const masseQty = (5 * factor).toFixed(1);
+    html += `<div class="shop-item" style="border-left:3px solid var(--orange)">
+      <div class="shop-item-name">📦 Çiğ Köfte Masse (fertig) <span class="shop-item-qty">${masseQty} kg</span></div>
+      <div class="item-checks">
+        <div class="item-check-wrap${lagerItems.has('Verbrauchsmaterial|Çiğ Köfte Masse')?' checked':''}" onclick="toggleLagerItem('Verbrauchsmaterial','Çiğ Köfte Masse')">
+          <div class="item-check-box${lagerItems.has('Verbrauchsmaterial|Çiğ Köfte Masse')?' checked-lager':''}">✓</div>
+          <span class="item-check-label">Bestellt/<br>Im Lager</span>
+        </div>
+        <div class="item-check-wrap${truckItems.has('Verbrauchsmaterial|Çiğ Köfte Masse')?' checked':''}" onclick="toggleTruckItem('Verbrauchsmaterial','Çiğ Köfte Masse')">
+          <div class="item-check-box${truckItems.has('Verbrauchsmaterial|Çiğ Köfte Masse')?' checked-truck':''}">✓</div>
+          <span class="item-check-label">Im Truck</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
   // Dynamic items
   dynamic.forEach(({key, label, count}) => {
     const isLager = lagerItems.has(VS+'|'+label);
@@ -1584,6 +1694,8 @@ function renderChecklist() {
       return;
     }
     const redirect = itemRedirects[VS+'|'+label];
+    // If redirected to another vendor, don't show in Lager section
+    if (redirect && redirect !== VS) return;
     const qtyStr = count > 0 ? count + ' Stück' : '—';
     html += itemRow(label, isLager, isTruck, countLabel, redirect, qtyStr);
   });
@@ -1597,6 +1709,8 @@ function renderChecklist() {
       return;
     }
     const redirect = itemRedirects[VS+'|'+item];
+    // If redirected to another vendor, don't show in Lager section
+    if (redirect && redirect !== VS) return;
     html += itemRow(item, isLager, isTruck, '', redirect, '—');
   });
 
