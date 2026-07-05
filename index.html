@@ -736,7 +736,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v3.3</span></p>
+    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v3.8</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -1166,9 +1166,9 @@ const BASE = {
   }},
   "Hummus-Bowl": { base: 20, shops: {
     "Gaziantep": [["Fladenbrot", 3, "Stück"]],
-    "Lidl": [["Duftreis", 1000, "g"], ["Cherry-Tomaten", 15, "Stück"], ["Olivenöl", 200, "g"], ["Zitronensaft", 45, "ml"], ["Wasser", 1000, "ml"], ["Knoblauchzehen", 2, "Stück"]],
-    "Selgros": [["Mais (abgetropft)", 570, "g"], ["Kichererbsen — Bowl", 1600, "g"], ["Rotkohlsalat", 750, "g"], ["Zaziki", 750, "g"], ["Tahin", 100, "g"], ["Kichererbsen — Hummus", 750, "g"], ["Kichererbsensaft", 200, "g"], ["Eingelegte Mini-Gurken", 15, "Stück"], ["Geschnittene Gurke / Maiskölbchen", 500, "g"], ],
-    "Mega": [["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 1, "Fl."], ["Petersilie (geschnitten)", 0.5, "Bund"], ["Ajvar", 750, "g"], ["Salz", 2.2, "TL"], ["Kreuzkümmel", 1, "TL"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."], ["Cayennepfeffer", 0.1, "g"], ["Gewürzmischung (Cumin, Cayenne, Salz)", 1, "Pck."]]
+    "Lidl": [["Duftreis", 500, "g"], ["Cherry-Tomaten", 20, "Stück"], ["Olivenöl", 40, "g"], ["Wasser", 1500, "ml"]],
+    "Selgros": [["Mais (abgetropft)", 570, "g"], ["Rotkohlsalat", 500, "g"], ["Zaziki", 500, "g"], ["Eingelegte Mini-Gurken", 20, "Stück"], ["Maiskölbchen", 20, "Stück"]],
+    "Mega": [["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 1, "Fl."], ["Ajvar", 750, "g"], ["Salz", 8, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."], ["Gewürzmischung (Cumin, Cayenne, Salz)", 1, "Pck."]]
   }},
   "Linsensuppe": { base: 30, shops: {
     "Lidl": [["Olivenöl", 71, "g"], ["Zwiebeln", 300, "g"], ["Kartoffeln", 400, "g"], ["Tomatenmark", 200, "g"], ["Zitronen", 2, "Stück"]],
@@ -1420,9 +1420,56 @@ function renderResult() {
     html = hintHtml + html; // Hint ganz oben, immer sichtbar
   }
 
+  // Back-Kitchen Checkliste für Hummus (1 Tag vorher, 1 Thermomix-Runde = 10 Portionen)
+  if (active.includes("Hummus-Bowl")) {
+    const hp = selections["Hummus-Bowl"].portions;
+    const r = hp / 10; // exakte Runden, linear skaliert
+    const rDisplay = (Math.round(r * 10) / 10).toString().replace('.', ',');
+    const hummusItems = [
+      { name: "Kichererbsen (abgetropft)", qty: Math.round(750*r), unit: "g" },
+      { name: "Kichererbsensaft", qty: Math.round(200*r), unit: "g" },
+      { name: "Tahin", qty: Math.round(100*r), unit: "g" },
+      { name: "Knoblauchzehen", qty: Math.round(2*r*10)/10, unit: "Stück" },
+      { name: "Olivenöl (Hummus)", qty: Math.round(80*r), unit: "g" },
+      { name: "Zitronensaft", qty: Math.round(45*r), unit: "ml" },
+      { name: "Petersilie (gehackt)", qty: Math.round(25*r), unit: "g" },
+      { name: "Salz (Hummus)", qty: Math.round(11*r), unit: "g" },
+      { name: "Kreuzkümmel", qty: Math.round(4*r), unit: "g" },
+      { name: "Cayennepfeffer", qty: Math.round(0.1*r*10)/10, unit: "g" },
+    ];
+    let hummusRows = '';
+    hummusItems.forEach(({name, qty, unit}) => {
+      const key = 'Hummus|' + name;
+      const done = lagerItems.has(key);
+      const safeName = name.replace(/'/g, "\\'");
+      hummusRows += `<div class="shop-item${done?'':''}" style="${done?'text-decoration:line-through;color:var(--text-muted);opacity:0.65':''}" onclick="toggleHummusItem('${safeName}')">
+        <span class="shop-item-name">${name}</span>
+        <span class="shop-item-qty">${qty} ${unit}</span>
+        <div class="item-checks">
+          <div class="item-check-wrap">
+            <div class="item-check-box${done?' checked-lager':''}">✓</div>
+            <span class="item-check-label">Erledigt</span>
+          </div>
+        </div>
+      </div>`;
+    });
+    const hummusHint = `<div class="shop-block" style="border:1.5px solid #4caf50">
+      <div class="shop-name" style="background:#4caf50">🏠 Back-Kitchen (1 Tag vorher): ${rDisplay} Thermomix-Runde(n) Hummus für ${hp} Bowls</div>
+      ${hummusRows}
+    </div>`;
+    html = hummusHint + html;
+  }
+
   res.innerHTML = html;
   renderChecklist();
   if (document.getElementById('panel-gericht').classList.contains('active')) renderGerichtView();
+}
+
+function toggleHummusItem(name) {
+  const key = 'Hummus|' + name;
+  if (lagerItems.has(key)) lagerItems.delete(key);
+  else lagerItems.add(key);
+  renderResult();
 }
 
 function setMasse(selbst) {
