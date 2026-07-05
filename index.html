@@ -736,7 +736,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v3.8</span></p>
+    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v4.1</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -1136,10 +1136,8 @@
 <script>
 const BASE = {
   "Klassik Fladenbrot": { base: 30, shops: {
-    "Gaziantep": [["Fladenbrot", 8, "Stück"]],
-    "Lidl": [["Olivenöl", 666, "g"]],
-    "Selgros": [["Kalamata Oliven", 750, "g"], ["Getrocknete Tomaten", 1, "Pck."]],
-    "Mega": [["Rucola (gewaschen)", 250, "g"], ["Mozzarella (Schnitt)", 1000, "g"], ["Gouda Käse (Schnitt)", 2000, "g"], ["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."], ["Ajvar", 1500, "g"], ["Gewürze (Oregano, Thymian, Pfeffer)", 1, "Pck."]]
+    "Selgros": [["Kalamata Oliven", 750, "g"]],
+    "Mega": [["Mega Mix (gemischter Salat)", 1800, "g"], ["Balsamico", 2, "Fl."], ["Ajvar", 1500, "g"]]
   }},
   "Oriental Fladenbrot": { base: 30, shops: {
     "Gaziantep": [["Fladenbrot", 8, "Stück"]],
@@ -1436,6 +1434,7 @@ function renderResult() {
       { name: "Salz (Hummus)", qty: Math.round(11*r), unit: "g" },
       { name: "Kreuzkümmel", qty: Math.round(4*r), unit: "g" },
       { name: "Cayennepfeffer", qty: Math.round(0.1*r*10)/10, unit: "g" },
+      { name: "Metall GN 1/4 Behälter + Deckel", qty: Math.ceil(hp / 20), unit: "Stück" },
     ];
     let hummusRows = '';
     hummusItems.forEach(({name, qty, unit}) => {
@@ -1460,9 +1459,55 @@ function renderResult() {
     html = hummusHint + html;
   }
 
+  // Back-Kitchen Checkliste für Klassik Fladenbrote (eigenständige Box)
+  if (active.includes("Klassik Fladenbrot")) {
+    const kp = selections["Klassik Fladenbrot"].portions;
+    const kf = kp / 30;
+    const rnd1 = v => Math.round(v * 10) / 10;
+    const klassikItems = [
+      { name: "Fladenbrot", qty: rnd1(8*kf), unit: "Stück" },
+      { name: "Olivenöl", qty: Math.round(100*kf), unit: "g" },
+      { name: "Getrocknete Tomaten", qty: rnd1(1.2*kf), unit: "Fl." },
+      { name: "Rucola (gewaschen)", qty: Math.round(100*kf), unit: "g" },
+      { name: "Mozzarella (Schnitt)", qty: Math.round(1000*kf), unit: "g" },
+      { name: "Gouda Käse (Schnitt)", qty: Math.round(2000*kf), unit: "g" },
+      { name: "Gewürze (Oregano, Thymian, Pfeffer)", qty: rnd1(1*kf), unit: "Pck." },
+      { name: "Isolierbox", qty: Math.ceil(kp / 40), unit: "Stück" },
+      { name: "Iso-Box-Tüte", qty: Math.ceil(kp / 40), unit: "Stück" },
+    ];
+    let klassikRows = '';
+    klassikItems.forEach(({name, qty, unit}) => {
+      const key = 'Klassik|' + name;
+      const done = lagerItems.has(key);
+      const safeName = name.replace(/'/g, "\\'");
+      klassikRows += `<div class="shop-item" style="${done?'text-decoration:line-through;color:var(--text-muted);opacity:0.65':''}" onclick="toggleKlassikItem('${safeName}')">
+        <span class="shop-item-name">${name}</span>
+        <span class="shop-item-qty">${qty} ${unit}</span>
+        <div class="item-checks">
+          <div class="item-check-wrap">
+            <div class="item-check-box${done?' checked-lager':''}">✓</div>
+            <span class="item-check-label">Erledigt</span>
+          </div>
+        </div>
+      </div>`;
+    });
+    const klassikHint = `<div class="shop-block" style="border:1.5px solid #2c7fb8">
+      <div class="shop-name" style="background:#2c7fb8">🥖 Back-Kitchen: Klassik Fladenbrote Vorbereitung für ${kp} Portionen</div>
+      ${klassikRows}
+    </div>`;
+    html = klassikHint + html;
+  }
+
   res.innerHTML = html;
   renderChecklist();
   if (document.getElementById('panel-gericht').classList.contains('active')) renderGerichtView();
+}
+
+function toggleKlassikItem(name) {
+  const key = 'Klassik|' + name;
+  if (lagerItems.has(key)) lagerItems.delete(key);
+  else lagerItems.add(key);
+  renderResult();
 }
 
 function toggleHummusItem(name) {
