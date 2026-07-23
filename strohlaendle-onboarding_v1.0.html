@@ -366,7 +366,7 @@
     <input type="text" name="entry.666155632" id="entry-nachname">
     <input type="text" name="entry.1580034090" id="entry-score">
     <input type="text" name="entry.2012460466" id="entry-versuch">
-    <input type="text" name="entry.NEUE_ID_HIER_EINFUEGEN" id="entry-antworten">
+    <input type="text" name="entry.2055003647" id="entry-antworten">
   </form>
 
 </div>
@@ -478,9 +478,13 @@
     let score = 0;
     let answerBits = '';
     questions.forEach((item, qi) => {
-      const isCorrect = userAnswers[qi] === item.correct;
-      if (isCorrect) score++;
-      answerBits += isCorrect ? '1' : '0';
+      if (userAnswers[qi] === null) {
+        answerBits += '-';
+      } else {
+        const isCorrect = userAnswers[qi] === item.correct;
+        if (isCorrect) score++;
+        answerBits += isCorrect ? '1' : '0';
+      }
     });
     lastScore = score;
     lastAnswerString = answerBits;
