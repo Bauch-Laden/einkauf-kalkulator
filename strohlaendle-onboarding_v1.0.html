@@ -366,6 +366,7 @@
     <input type="text" name="entry.666155632" id="entry-nachname">
     <input type="text" name="entry.1580034090" id="entry-score">
     <input type="text" name="entry.2012460466" id="entry-versuch">
+    <input type="text" name="entry.NEUE_ID_HIER_EINFUEGEN" id="entry-antworten">
   </form>
 
 </div>
@@ -437,6 +438,7 @@
   let attemptCount = 1;
   let userAnswers = new Array(questions.length).fill(null);
   let lastScore = 0;
+  let lastAnswerString = '';
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -474,10 +476,14 @@
 
   function evaluateQuiz() {
     let score = 0;
+    let answerBits = '';
     questions.forEach((item, qi) => {
-      if (userAnswers[qi] === item.correct) score++;
+      const isCorrect = userAnswers[qi] === item.correct;
+      if (isCorrect) score++;
+      answerBits += isCorrect ? '1' : '0';
     });
     lastScore = score;
+    lastAnswerString = answerBits;
     showScreen('screen-name');
   }
 
@@ -494,6 +500,7 @@
     document.getElementById('entry-nachname').value = nachname;
     document.getElementById('entry-score').value = lastScore + ' / ' + questions.length;
     document.getElementById('entry-versuch').value = attemptCount;
+    document.getElementById('entry-antworten').value = lastAnswerString;
     document.getElementById('gform').submit();
 
     document.getElementById('result-name').textContent = 'Gut gemacht, ' + vorname + '!';
