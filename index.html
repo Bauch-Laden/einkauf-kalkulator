@@ -736,7 +736,7 @@
   <div class="logo">🥙</div>
   <div class="header-text">
     <h1>Bauch-Laden Food-Truck</h1>
-    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v4.1</span></p>
+    <p>Portionskalkulator &amp; Einkaufsliste <span style="opacity:0.6;font-size:11px;">v4.4</span></p>
   </div>
 </header>
 <div class="readonly-banner" id="readonly-banner">
@@ -798,6 +798,7 @@
     <div id="share-row" class="share-row" style="display: flex;">
       <button class="share-btn" onclick="shareList()">🔗 Liste teilen</button>
       <button class="reset-btn" style="align-self:center;" onclick="resetBought()">Einkaufsliste zurücksetzen</button>
+      <button class="reset-btn" style="align-self:center;" onclick="openCustomModal()">＋ Eigenes Element</button>
       <div class="share-toast" id="share-toast">✓ Link kopiert!</div>
     </div>
     <div id="result"><div class="shop-block"><div class="shop-name">Gaziantep</div><div class="shop-item">
@@ -1133,6 +1134,17 @@
   </div>
 </div>
 
+<div class="redirect-modal-bg" id="custom-modal-bg">
+  <div class="redirect-modal">
+    <h3>＋ Eigenes Element hinzufügen</h3>
+    <input type="text" id="custom-name" placeholder="Name (z.B. Küchenrolle)" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+    <input type="text" id="custom-qty" placeholder="Menge (z.B. 2 Pck.)" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px">
+    <p style="font-size:12px;color:var(--text-muted);margin:4px 0 8px">Vendor auswählen um hinzuzufügen:</p>
+    <div class="redirect-shop-list" id="custom-shop-list"></div>
+    <button class="redirect-cancel" onclick="closeCustomModal()">Abbrechen</button>
+  </div>
+</div>
+
 <script>
 const BASE = {
   "Klassik Fladenbrot": { base: 30, shops: {
@@ -1311,6 +1323,8 @@ function setPortion(name, val) {
 }
 
 let doneItems = [];
+let lagerRedirectedItems = [];
+let backKitchenDone = [];
 function renderResult() {
   const res = document.getElementById('result');
   const active = dishNames.filter(n => selections[n].active && selections[n].portions > 0);
@@ -1319,12 +1333,15 @@ function renderResult() {
   if (!active.length) {
     res.innerHTML = `<div class="empty-state"><div class="empty-icon">🛒</div>Gericht auswählen um die Einkaufsliste zu generieren</div>`;
     if (shareRow) shareRow.style.display = 'none';
+    lagerRedirectedItems = [];
+    backKitchenDone = [];
     renderChecklist();
     return;
   }
 
   if (shareRow) shareRow.style.display = 'flex';
 
+  backKitchenDone = [];
   const combined = {};
   active.forEach(name => {
     const factor = selections[name].portions / BASE[name].base;
@@ -1344,6 +1361,20 @@ function renderResult() {
       });
     });
   });
+
+  // Eigene Elemente in die Vendor-Sektionen einfügen
+  customItems.forEach(({name, qty, vendor}) => {
+    if (!combined[vendor]) combined[vendor] = {};
+    combined[vendor][name + '|custom'] = { item: name, qty: 0, unit: '', customQty: qty, custom: true, originalShop: vendor };
+  });
+
+  // Items die zu "Lager" verschoben wurden: aus Vendor-Blöcken herausziehen,
+  // renderChecklist zeigt sie in der Lager-Box an
+  lagerRedirectedItems = [];
+  if (combined['Lager']) {
+    Object.values(combined['Lager']).forEach(entry => lagerRedirectedItems.push(entry));
+    delete combined['Lager'];
+  }
 
   // Inject redirected Lager/Verbrauchsmaterial items into target vendor
   const VS = 'Verbrauchsmaterial';
@@ -1374,7 +1405,7 @@ function renderResult() {
     if (pendingItems.length === 0) return;
 
     html += `<div class="shop-block"><div class="shop-name">${shop}</div>`;
-    pendingItems.forEach(({item, qty, unit, originalShop}) => {
+    pendingItems.forEach(({item, qty, unit, originalShop, customQty, custom}) => {
       const bkey = shop + '|' + item;
       const isLager = lagerItems.has(bkey);
       const isTruck = truckItems.has(bkey);
@@ -1384,11 +1415,15 @@ function renderResult() {
       const origShop = originalShop || shop;
       const redirectKey = origShop + '|' + item;
       const redirectedTo = itemRedirects[redirectKey];
-      const redirectBadge = (redirectedTo && redirectedTo === shop) ? `<span class="redirect-badge">verschoben von ${origShop}</span>` : '';
+      const redirectBadge = custom ? `<span class="redirect-badge">eigenes Element</span>` : ((redirectedTo && redirectedTo === shop) ? `<span class="redirect-badge">verschoben von ${origShop}</span>` : '');
       const safeOrigShop = origShop.replace(/'/g, "\'");
+      const qtyDisplay = custom ? customQty : fmt(qty, unit);
+      const actionBtn = custom
+        ? `<button class="redirect-btn" onclick="removeCustomItem('${safeItem}','${safeShop}')">✕</button>`
+        : `<button class="redirect-btn" onclick="openRedirectModal('${safeOrigShop}','${safeItem}','${fmt(qty,unit).replace(/'/g,"\'")}','${safeShop}')">🔀</button>`;
       html += `<div class="shop-item${statusClass}">
         <span class="shop-item-name">${item}${redirectBadge}</span>
-        <span class="shop-item-qty">${fmt(qty, unit)}</span>
+        <span class="shop-item-qty">${qtyDisplay}</span>
         <div class="item-checks">
           <div class="item-check-wrap" onclick="toggleLagerItem('${safeShop}','${safeItem}')">
             <div class="item-check-box${isLager||isTruck?' checked-lager':''}">✓</div>
@@ -1398,7 +1433,7 @@ function renderResult() {
             <div class="item-check-box${isTruck?' checked-truck':''}">✓</div>
             <span class="item-check-label">Im Truck</span>
           </div>
-          <button class="redirect-btn" onclick="openRedirectModal('${safeOrigShop}','${safeItem}','${fmt(qty,unit).replace(/'/g,"\'")}','${safeShop}')">🔀</button>
+          ${actionBtn}
         </div>
       </div>`;
     });
@@ -1439,15 +1474,25 @@ function renderResult() {
     let hummusRows = '';
     hummusItems.forEach(({name, qty, unit}) => {
       const key = 'Hummus|' + name;
-      const done = lagerItems.has(key);
+      const isLg = lagerItems.has(key);
+      const isBk = truckItems.has(key);
+      const done = isLg && isBk;
+      if (done) {
+        backKitchenDone.push({ name, extra: ` (${qty} ${unit})`, shop: 'Hummus', label2: 'In der<br>Back-Küche' });
+        return;
+      }
       const safeName = name.replace(/'/g, "\\'");
-      hummusRows += `<div class="shop-item${done?'':''}" style="${done?'text-decoration:line-through;color:var(--text-muted);opacity:0.65':''}" onclick="toggleHummusItem('${safeName}')">
+      hummusRows += `<div class="shop-item">
         <span class="shop-item-name">${name}</span>
         <span class="shop-item-qty">${qty} ${unit}</span>
         <div class="item-checks">
-          <div class="item-check-wrap">
-            <div class="item-check-box${done?' checked-lager':''}">✓</div>
-            <span class="item-check-label">Erledigt</span>
+          <div class="item-check-wrap${isLg?' checked':''}" onclick="toggleLagerItem('Hummus','${safeName}')">
+            <div class="item-check-box${isLg?' checked-lager':''}">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap${isBk?' checked':''}" onclick="toggleTruckItem('Hummus','${safeName}')">
+            <div class="item-check-box${isBk?' checked-truck':''}">✓</div>
+            <span class="item-check-label">In der<br>Back-Küche</span>
           </div>
         </div>
       </div>`;
@@ -1478,15 +1523,25 @@ function renderResult() {
     let klassikRows = '';
     klassikItems.forEach(({name, qty, unit}) => {
       const key = 'Klassik|' + name;
-      const done = lagerItems.has(key);
+      const isLg = lagerItems.has(key);
+      const isBk = truckItems.has(key);
+      const done = isLg && isBk;
+      if (done) {
+        backKitchenDone.push({ name, extra: ` (${qty} ${unit})`, shop: 'Klassik', label2: 'In der<br>Back-Küche' });
+        return;
+      }
       const safeName = name.replace(/'/g, "\\'");
-      klassikRows += `<div class="shop-item" style="${done?'text-decoration:line-through;color:var(--text-muted);opacity:0.65':''}" onclick="toggleKlassikItem('${safeName}')">
+      klassikRows += `<div class="shop-item">
         <span class="shop-item-name">${name}</span>
         <span class="shop-item-qty">${qty} ${unit}</span>
         <div class="item-checks">
-          <div class="item-check-wrap">
-            <div class="item-check-box${done?' checked-lager':''}">✓</div>
-            <span class="item-check-label">Erledigt</span>
+          <div class="item-check-wrap${isLg?' checked':''}" onclick="toggleLagerItem('Klassik','${safeName}')">
+            <div class="item-check-box${isLg?' checked-lager':''}">✓</div>
+            <span class="item-check-label">Bestellt/<br>Im Lager</span>
+          </div>
+          <div class="item-check-wrap${isBk?' checked':''}" onclick="toggleTruckItem('Klassik','${safeName}')">
+            <div class="item-check-box${isBk?' checked-truck':''}">✓</div>
+            <span class="item-check-label">In der<br>Back-Küche</span>
           </div>
         </div>
       </div>`;
@@ -1554,7 +1609,44 @@ function resetBought() {
 // item redirects: "originalShop|item" -> "newShop"
 const itemRedirects = {};
 
-const ALL_SHOPS = ["Gaziantep","Türkischer Supermarkt (Hedef/Hakverdi)","Lidl","Mega","Selgros","DM","Rewe","Kaufland","Edeka","Sonstiges"];
+const ALL_SHOPS = ["Gaziantep","Türkischer Supermarkt (Hedef/Hakverdi)","Lidl","Mega","Selgros","DM","Rewe","Kaufland","Edeka","Lager","Sonstiges"];
+
+let customItems = []; // {name, qty, vendor}
+
+function openCustomModal() {
+  document.getElementById('custom-name').value = '';
+  document.getElementById('custom-qty').value = '';
+  const list = document.getElementById('custom-shop-list');
+  list.innerHTML = '';
+  ALL_SHOPS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'redirect-shop-btn';
+    btn.textContent = s;
+    btn.onclick = () => addCustomItem(s);
+    list.appendChild(btn);
+  });
+  document.getElementById('custom-modal-bg').classList.add('open');
+  setTimeout(() => document.getElementById('custom-name').focus(), 50);
+}
+
+function closeCustomModal() { document.getElementById('custom-modal-bg').classList.remove('open'); }
+
+function addCustomItem(vendor) {
+  const name = document.getElementById('custom-name').value.trim();
+  const qty = document.getElementById('custom-qty').value.trim() || '—';
+  if (!name) { document.getElementById('custom-name').focus(); return; }
+  customItems.push({ name, qty, vendor });
+  closeCustomModal();
+  renderResult();
+}
+
+function removeCustomItem(name, vendor) {
+  const idx = customItems.findIndex(c => c.name === name && c.vendor === vendor);
+  if (idx >= 0) customItems.splice(idx, 1);
+  lagerItems.delete(vendor + '|' + name);
+  truckItems.delete(vendor + '|' + name);
+  renderResult();
+}
 
 function openRedirectModal(origShop, item, qty, currentShop) {
   const bg = document.getElementById('redirect-modal-bg');
@@ -1573,7 +1665,7 @@ function openRedirectModal(origShop, item, qty, currentShop) {
     list.appendChild(resetBtn);
   }
   // All shops except current location
-  ALL_SHOPS.filter(s => s !== current).forEach(s => {
+  ALL_SHOPS.filter(s => s !== current && !(origShop === 'Verbrauchsmaterial' && s === 'Lager')).forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'redirect-shop-btn';
     btn.textContent = s;
@@ -1590,6 +1682,8 @@ function closeRedirectModal() {
 document.addEventListener('click', e => {
   const bg = document.getElementById('redirect-modal-bg');
   if (e.target === bg) closeRedirectModal();
+  const cbg = document.getElementById('custom-modal-bg');
+  if (e.target === cbg) closeCustomModal();
 });
 
 function switchTab(tab) {
@@ -1653,20 +1747,35 @@ function shareList() {
 
   let url = window.location.href.split('?')[0] + '?list=' + params.join(',');
 
-  // Encode lager + truck items
+  // Encode lager + truck items — doppelt encodiert, da URLSearchParams beim
+  // Lesen einmal decodiert und Kommas in Namen sonst das Splitting zerstören
+  const enc2 = k => encodeURIComponent(encodeURIComponent(k));
   if (lagerItems.size > 0) {
-    const arr = [...lagerItems].map(k => encodeURIComponent(k));
-    url += '&lager=' + arr.join(',');
+    url += '&lager=' + [...lagerItems].map(enc2).join(',');
   }
   if (truckItems.size > 0) {
-    const arr = [...truckItems].map(k => encodeURIComponent(k));
-    url += '&truck=' + arr.join(',');
+    url += '&truck=' + [...truckItems].map(enc2).join(',');
   }
 
   // Encode checked checklist items
   if (checked.size > 0) {
-    const checkedArr = [...checked].map(k => encodeURIComponent(k));
-    url += '&ticked=' + checkedArr.join(',');
+    url += '&ticked=' + [...checked].map(enc2).join(',');
+  }
+
+  // Encode Çiğ Köfte Masse Auswahl
+  if (!cigKofteMasseSelbst) {
+    url += '&masse=kaufen';
+  }
+
+  // Encode eigene Elemente
+  if (customItems.length > 0) {
+    url += '&custom=' + customItems.map(c => enc2(c.name) + '~' + enc2(c.qty) + '~' + enc2(c.vendor)).join(',');
+  }
+
+  // Encode Vendor-Verschiebungen
+  const redirKeys = Object.keys(itemRedirects);
+  if (redirKeys.length > 0) {
+    url += '&redir=' + redirKeys.map(k => enc2(k) + '~' + enc2(itemRedirects[k])).join(',');
   }
 
   navigator.clipboard.writeText(url).then(() => {
@@ -1693,7 +1802,8 @@ function loadFromURL() {
     }
   });
 
-  // Restore lager + truck items
+  // Restore lager + truck items (URLSearchParams hat bereits einmal decodiert,
+  // Kommas in Namen sind noch als %2C geschützt)
   const lagerParam = params.get('lager');
   if (lagerParam) lagerParam.split(',').forEach(k => lagerItems.add(decodeURIComponent(k)));
   const truckParam = params.get('truck');
@@ -1703,6 +1813,27 @@ function loadFromURL() {
   const tickedParam = params.get('ticked');
   if (tickedParam) {
     tickedParam.split(',').forEach(k => checked.add(decodeURIComponent(k)));
+  }
+
+  // Restore Çiğ Köfte Masse Auswahl
+  if (params.get('masse') === 'kaufen') cigKofteMasseSelbst = false;
+
+  // Restore eigene Elemente
+  const customParam = params.get('custom');
+  if (customParam) {
+    customParam.split(',').forEach(triple => {
+      const [n, q, v] = triple.split('~');
+      if (n && v) customItems.push({ name: decodeURIComponent(n), qty: decodeURIComponent(q||'—'), vendor: decodeURIComponent(v) });
+    });
+  }
+
+  // Restore Vendor-Verschiebungen
+  const redirParam = params.get('redir');
+  if (redirParam) {
+    redirParam.split(',').forEach(pair => {
+      const [k, v] = pair.split('~');
+      if (k && v) itemRedirects[decodeURIComponent(k)] = decodeURIComponent(v);
+    });
   }
 
   return true;
@@ -1738,18 +1869,21 @@ function renderChecklist() {
     </div>`;
   }
 
-  function doneRow(name, extraLabel) {
+  function doneRow(name, extraLabel, shop, label2) {
+    const s = shop || VS;
+    const l2 = label2 || 'Im Truck';
     const safeName = name.replace(/'/g, "\\'");
+    const safeShop = s.replace(/'/g, "\\'");
     return `<div class="shop-item" style="opacity:0.6;text-decoration:line-through;color:var(--text-muted)">
       <div class="shop-item-name">${name}${extraLabel||''}</div>
       <div class="item-checks">
-        <div class="item-check-wrap" onclick="toggleLagerItem('${VS}','${safeName}')">
+        <div class="item-check-wrap" onclick="toggleLagerItem('${safeShop}','${safeName}')">
           <div class="item-check-box checked-lager">✓</div>
           <span class="item-check-label">Bestellt/<br>Im Lager</span>
         </div>
-        <div class="item-check-wrap" onclick="toggleTruckItem('${VS}','${safeName}')">
+        <div class="item-check-wrap" onclick="toggleTruckItem('${safeShop}','${safeName}')">
           <div class="item-check-box checked-truck">✓</div>
-          <span class="item-check-label">Im Truck</span>
+          <span class="item-check-label">${l2}</span>
         </div>
       </div>
     </div>`;
@@ -1773,6 +1907,36 @@ function renderChecklist() {
       </div>
     </div>`;
   }
+
+  // Vendor-Items die zu "Lager" verschoben wurden
+  lagerRedirectedItems.forEach(({item, qty, unit, originalShop, customQty, custom}) => {
+    const bkey = 'Lager|' + item;
+    const isLg = lagerItems.has(bkey);
+    const isTr = truckItems.has(bkey);
+    const safeName = item.replace(/'/g, "\\'");
+    const safeOrig = (originalShop||'').replace(/'/g, "\\'");
+    const qtyStr = custom ? customQty : fmt(qty, unit);
+    if (isLg && isTr) {
+      doneAll.push({ name: item, extra: ` (${qtyStr})`, shop: 'Lager' });
+      return;
+    }
+    html += `<div class="shop-item">
+      <div class="shop-item-name">${item} <span class="shop-item-qty">${qtyStr}</span> ${custom ? `<span class="redirect-badge">eigenes Element</span>` : `<span class="redirect-badge">verschoben von ${originalShop}</span>`}</div>
+      <div class="item-checks">
+        <div class="item-check-wrap${isLg?' checked':''}" onclick="toggleLagerItem('Lager','${safeName}')">
+          <div class="item-check-box${isLg?' checked-lager':''}">✓</div>
+          <span class="item-check-label">Bestellt/<br>Im Lager</span>
+        </div>
+        <div class="item-check-wrap${isTr?' checked':''}" onclick="toggleTruckItem('Lager','${safeName}')">
+          <div class="item-check-box${isTr?' checked-truck':''}">✓</div>
+          <span class="item-check-label">Im Truck</span>
+        </div>
+        ${custom
+          ? `<button class="redirect-btn" onclick="removeCustomItem('${safeName}','Lager')">✕</button>`
+          : `<button class="redirect-btn" onclick="openRedirectModal('${safeOrig}','${safeName}','${qtyStr.replace(/'/g,"\\'")}','Lager')">🔀</button>`}
+      </div>
+    </div>`;
+  });
 
   // Dynamic items
   dynamic.forEach(({key, label, count}) => {
@@ -1806,17 +1970,18 @@ function renderChecklist() {
     html += itemRow(item, isLager, isTruck, '', redirect, '—');
   });
 
-  // All done items — Vendor + Verbrauchsmaterial together at the very bottom
+  // All done items — Vendor + Verbrauchsmaterial + Back-Kitchen together at the very bottom
+  backKitchenDone.forEach(e => doneAll.push(e));
   const totalDone = doneItems.length + doneAll.length;
   if (totalDone > 0) {
     html += `<div style="background:#4caf50;color:white;font-size:13px;font-weight:600;padding:8px 14px;margin-top:4px">✅ Bereits erledigt (${totalDone})</div>`;
     // Vendor items
-    doneItems.forEach(({item, qty, unit, shop}) => {
+    doneItems.forEach(({item, qty, unit, shop, customQty, custom}) => {
       const safeShop = shop.replace(/'/g, "\'");
       const safeItem = item.replace(/'/g, "\'");
       html += `<div class="shop-item" style="opacity:0.6;text-decoration:line-through;color:var(--text-muted)">
         <span class="shop-item-name">${item} <span style="font-size:11px;color:var(--text-subtle)">(${shop})</span></span>
-        <span class="shop-item-qty">${fmt(qty, unit)}</span>
+        <span class="shop-item-qty">${custom ? customQty : fmt(qty, unit)}</span>
         <div class="item-checks">
           <div class="item-check-wrap" onclick="toggleLagerItem('${safeShop}','${safeItem}')">
             <div class="item-check-box checked-lager">✓</div>
@@ -1830,7 +1995,7 @@ function renderChecklist() {
       </div>`;
     });
     // Verbrauchsmaterial items
-    doneAll.forEach(({name, extra}) => { html += doneRow(name, extra); });
+    doneAll.forEach(({name, extra, shop, label2}) => { html += doneRow(name, extra, shop, label2); });
   }
 
   container.innerHTML = html;
